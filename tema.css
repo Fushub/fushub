@@ -1,0 +1,59 @@
+/*
+  tema.css — Fushub
+  Inclua este arquivo em TODAS as páginas após styles.css / após os <style> inline.
+  O auth.js aplica/remove a classe .dark-mode no <html> automaticamente
+  com base na preferência salva em localStorage ('fushub_tema').
+*/
+
+/* ── Modo escuro ─────────────────────────────────────────────────────── */
+html.dark-mode {
+  /* Fundos */
+  --navy:       #080e1e !important;
+  --navy-2:     #0d1528 !important;
+  --navy-card:  #0f1c35 !important;
+  --navy-input: #0b1627 !important;
+
+  /* Textos */
+  --text:       #e8edf5 !important;
+  --text-soft:  #b0bdd4 !important;
+  --muted:      #8494b0 !important;
+  --white:      #ffffff !important;
+
+  /* Bordas */
+  --border:     rgba(255,255,255,0.08) !important;
+  --border-2:   rgba(255,255,255,0.12) !important;
+
+  /* Bg global do body */
+  background-color: #080e1e !important;
+}
+
+html.dark-mode body {
+  background: #080e1e !important;
+  color: #e8edf5 !important;
+}
+
+/* Inputs e selects no dark mode */
+html.dark-mode input,
+html.dark-mode textarea,
+html.dark-mode select {
+  background: var(--navy-input, #0b1627) !important;
+  color: var(--text, #e8edf5) !important;
+  border-color: var(--border, rgba(255,255,255,0.08)) !important;
+}
+
+/* Exceções: inputs que devem ser transparentes no dark mode */
+html.dark-mode .sb-input,
+html.dark-mode .sb-input:focus {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+html.dark-mode input::placeholder,
+html.dark-mode textarea::placeholder {
+  color: rgba(132,148,176,0.5) !important;
+}
+
+/* Scrollbar no dark mode */
+html.dark-mode ::-webkit-scrollbar { width: 6px; }
+html.dark-mode ::-webkit-scrollbar-track { background: #0d1528; }
+html.dark-mode ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }

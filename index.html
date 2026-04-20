@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fushub </title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="tema.css" />
+</head>
+<body>
+
+  <nav id="navbar">
+    <a href="#" class="logo">FUS<span>HUB</span></a>
+    <div class="nav-right">
+      <button class="btn-entrar" onclick="window.location.href='entrar.html'">Entrar</button>
+      <button class="btn-cadastrar" onclick="window.location.href='cadastro.html'">Cadastrar</button>
+      <button class="hamburger" id="hamburger">☰</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <h1>Encontre sua<br><em>moradia ideal</em><br>perto da faculdade.</h1>
+      <p class="hero-sub">O Fushub conecta universitários e vestibulandos a quartos, repúblicas e apartamentos acessíveis, seguros e próximos às instituições de ensino.</p>
+      <div class="hero-btns">
+        <!-- Redireciona para plataforma se logado, senão para entrar -->
+        <button class="btn-primary" onclick="irParaPlataforma()">Conhecer a Plataforma</button>
+        <a href="como-funciona.html" class="btn-ghost">Como Funciona</a>
+      </div>
+      <div class="hero-trust">
+        <p class="trust-text">Criado por <strong>estudantes</strong> para estudantes</p>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div style="position:relative;">
+        <div class="search-widget">
+          <div class="search-widget-title">Buscar moradia</div>
+
+          <div class="sw-field">
+            <label class="sw-label">Onde?</label>
+            <div class="sw-input">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              <input type="text" placeholder="Cidade ou universidade..." />
+            </div>
+          </div>
+
+          <div class="sw-field">
+            <label class="sw-label">Tipo de acomodação</label>
+            <div class="sw-tipos" id="tiposGrid">
+              <div class="sw-tipo-opt" onclick="toggleTipo(this)"><span class="sw-check">✓</span> Quarto individual</div>
+              <div class="sw-tipo-opt" onclick="toggleTipo(this)"><span class="sw-check">✓</span> Quarto compartilhado</div>
+              <div class="sw-tipo-opt" onclick="toggleTipo(this)"><span class="sw-check">✓</span> Kitnet</div>
+              <div class="sw-tipo-opt active" onclick="toggleTipo(this)"><span class="sw-check">✓</span> República</div>
+              <div class="sw-tipo-opt" onclick="toggleTipo(this)"><span class="sw-check">✓</span> Casa</div>
+              <div class="sw-tipo-opt" onclick="toggleTipo(this)"><span class="sw-check">✓</span> Apartamento</div>
+            </div>
+          </div>
+
+          <div class="sw-field">
+            <div class="sw-price-row">
+              <label class="sw-label" style="margin:0">Preço máximo</label>
+              <span class="sw-price-val" id="priceVal">R$ 1.500/mês</span>
+            </div>
+            <input type="range" class="sw-range" id="priceRange"
+              min="300" max="5000" value="1500" step="50"
+              oninput="updatePrice(this.value)" />
+          </div>
+
+          <button class="sw-btn" onclick="window.location.href='entrar.html'">Buscar imóveis</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- IMÓVEIS EM DESTAQUE -->
+  <section id="plataforma" class="section">
+    <div class="section-inner">
+      <div class="section-label">Moradia estudantil</div>
+      <h2 class="section-title">Chega de sofrer para <em>achar onde morar</em></h2>
+      <p class="section-sub">Descubra as melhores opções de moradia estudantil, verificadas e avaliadas pela nossa comunidade.</p>
+      <div class="imoveis-grid">
+
+        <div class="imovel-card reveal">
+          <div class="imovel-img" style="background: linear-gradient(135deg,#dbeafe,#bfdbfe);">
+            <span class="imovel-fav">♡</span>
+            <div class="imovel-emoji">🏢</div>
+          </div>
+          <div class="imovel-body">
+            <div class="imovel-top">
+              <h4>Apartamento 2 quartos no centro</h4>
+              <span class="imovel-stars">★ <em>4.8</em> <small>(0)</small></span>
+            </div>
+            <p class="imovel-loc">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Centro, São Paulo
+            </p>
+            <div class="imovel-footer">
+              <span class="imovel-tipo">apartamento</span>
+              <span class="imovel-moradores">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                0 moradores
+              </span>
+            </div>
+            <div class="imovel-price">R$ <strong>1.200</strong>/mês</div>
+          </div>
+        </div>
+
+        <div class="imovel-card reveal">
+          <div class="imovel-img" style="background: linear-gradient(135deg,#d1fae5,#a7f3d0);">
+            <span class="imovel-fav">♡</span>
+            <div class="imovel-emoji">🏠</div>
+          </div>
+          <div class="imovel-body">
+            <div class="imovel-top">
+              <h4>República próxima à USP</h4>
+              <span class="imovel-stars">★ <em>4.9</em> <small>(12)</small></span>
+            </div>
+            <p class="imovel-loc">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Butantã, São Paulo
+            </p>
+            <div class="imovel-footer">
+              <span class="imovel-tipo">república</span>
+              <span class="imovel-moradores">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                4 moradores
+              </span>
+            </div>
+            <div class="imovel-price">R$ <strong>750</strong>/mês</div>
+          </div>
+        </div>
+
+        <div class="imovel-card reveal">
+          <div class="imovel-img" style="background: linear-gradient(135deg,#ede9fe,#ddd6fe);">
+            <span class="imovel-fav">♡</span>
+            <div class="imovel-emoji">🛏️</div>
+          </div>
+          <div class="imovel-body">
+            <div class="imovel-top">
+              <h4>Kitnet mobiliada perto da UNICAMP</h4>
+              <span class="imovel-stars">★ <em>4.7</em> <small>(5)</small></span>
+            </div>
+            <p class="imovel-loc">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Barão Geraldo, Campinas
+            </p>
+            <div class="imovel-footer">
+              <span class="imovel-tipo">kitnet</span>
+              <span class="imovel-moradores">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                1 morador
+              </span>
+            </div>
+            <div class="imovel-price">R$ <strong>900</strong>/mês</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- FAQ -->
+  <section id="como-funciona" class="section">
+    <div class="section-inner faq-layout">
+      <div class="faq-left">
+        <div class="section-label">Dúvidas</div>
+        <h2 class="section-title">Respostas para suas <em>perguntas</em></h2>
+        <p class="section-sub" style="margin-bottom:0">Tudo que você precisa saber sobre o Fushub antes de começar.</p>
+      </div>
+      <div class="faq-right">
+        <div class="faq-item reveal" onclick="toggleFaq(this)">
+          <div class="faq-q">O que é o Fushub e como ele funciona? <span class="faq-arrow">›</span></div>
+          <div class="faq-a">O Fushub é uma plataforma que conecta estudantes universitários a quartos, repúblicas, kitnets e apartamentos próximos às faculdades. Você busca pelo imóvel ideal usando filtros, entra em contato com o proprietário e fecha o contrato digitalmente.</div>
+        </div>
+        <div class="faq-item reveal" onclick="toggleFaq(this)">
+          <div class="faq-q">Como faço para encontrar um imóvel? <span class="faq-arrow">›</span></div>
+          <div class="faq-a">Na tela inicial, use o widget de busca para filtrar por cidade, tipo de acomodação e preço máximo. Os resultados mostram apenas imóveis verificados e próximos à sua universidade.</div>
+        </div>
+        <div class="faq-item reveal active" onclick="toggleFaq(this)">
+          <div class="faq-q">Os imóveis são verificados? <span class="faq-arrow">›</span></div>
+          <div class="faq-a">Sim! Todos os imóveis passam por uma verificação antes de aparecerem na plataforma. Proprietários precisam enviar fotos reais e documentação do imóvel para obter o selo "Verificado".</div>
+        </div>
+        <div class="faq-item reveal" onclick="toggleFaq(this)">
+          <div class="faq-q">Preciso pagar para usar o Fushub? <span class="faq-arrow">›</span></div>
+          <div class="faq-a">Para estudantes, a busca e o contato com proprietários é totalmente gratuito. Proprietários que quiserem destaque para seus imóveis podem optar por planos pagos.</div>
+        </div>
+        <div class="faq-item reveal" onclick="toggleFaq(this)">
+          <div class="faq-q">Como funciona o contrato digital? <span class="faq-arrow">›</span></div>
+          <div class="faq-a">Após combinar os detalhes com o proprietário, o contrato é gerado e assinado eletronicamente pela plataforma, com validade jurídica e sem necessidade de cartório.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <p class="footer-left">
+        © 2025 Fushub ·
+        <a href="#">Privacidade</a> ·
+        <a href="#">Termos</a> ·
+        <a href="#">Informações da empresa</a>
+      </p>
+      <div class="footer-socials">
+        <a href="https://www.instagram.com/_fushub?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" title="Instagram">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+          </svg>
+        </a>
+        <a href="https://www.linkedin.com/in/fushub-%E2%A0%80-7a0a84387/" target="_blank" title="LinkedIn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/>
+            <rect x="2" y="9" width="4" height="12"/>
+            <circle cx="4" cy="4" r="2"/>
+          </svg>
+        </a>
+        <a href="https://www.tiktok.com/@fushub_?is_from_webapp=1&sender_device=pc" target="_blank" title="TikTok">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.75a4.85 4.85 0 01-1.01-.06z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+  <script>
+    /* Redirecionamento inteligente do botão "Conhecer a Plataforma"
+       Usa sessionStorage como flag de "logado" (simulado).
+       No cadastro/entrar, ao criar conta ou fazer login com sucesso,
+       define fushub_logado = '1'. Aqui verificamos isso.          */
+    function irParaPlataforma() {
+      const logado = sessionStorage.getItem('fushub_logado');
+      if (logado === '1') {
+        window.location.href = 'plataforma.html';
+      } else {
+        window.location.href = 'entrar.html';
+      }
+    }
+  </script>
+</body>
+</html>

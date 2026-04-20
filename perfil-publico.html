@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perfil do Anfitrião — Fushub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:       #1e56ff;
+      --blue-2:     #3b73ff;
+      --gold:       #f0a500;
+      --navy:       #f5f7fc;
+      --navy-2:     #eef1f8;
+      --navy-card:  #ffffff;
+      --navy-input: #f0f3fa;
+      --border:     rgba(0,0,0,0.08);
+      --muted:      #6b7fa3;
+      --text:       #1a2540;
+      --green:      #22c55e;
+      --nav-h:      70px;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--navy); color: var(--text);
+      -webkit-font-smoothing: antialiased; min-height: 100vh;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: radial-gradient(rgba(30,86,255,0.06) 1px, transparent 1px);
+      background-size: 28px 28px; pointer-events: none; z-index: 0;
+    }
+
+    /* NAV */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: var(--nav-h); background: var(--navy-2);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 2rem; gap: 1rem;
+    }
+    .nav-logo { font-size: 1.3rem; font-weight: 800; color: var(--text); text-decoration: none; }
+    .nav-logo span { color: var(--gold); }
+    .nav-back {
+      display: flex; align-items: center; gap: 0.45rem;
+      color: var(--muted); text-decoration: none;
+      font-size: 0.85rem; font-weight: 600;
+      padding: 0.4rem 0.85rem; border-radius: 50px;
+      border: 1px solid var(--border); background: var(--navy-card);
+      transition: color .2s, border-color .2s; margin-left: auto;
+    }
+    .nav-back:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+    .nav-back svg { width: 14px; height: 14px; }
+
+    /* PAGE */
+    .page {
+      position: relative; z-index: 1;
+      max-width: 720px; margin: 0 auto;
+      padding: calc(var(--nav-h) + 2.5rem) 2rem 4rem;
+    }
+
+    /* HERO CARD */
+    .hero-card {
+      background: var(--navy-card); border: 1px solid var(--border);
+      border-radius: 24px; padding: 2rem;
+      display: flex; gap: 1.5rem; align-items: flex-start;
+      margin-bottom: 1.2rem;
+      animation: fadeUp .45s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+
+    .hero-avatar {
+      width: 88px; height: 88px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--blue) 0%, #6b3cff 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: 800; color: var(--text);
+      border: 3px solid rgba(30,86,255,0.3); overflow: hidden;
+    }
+    .hero-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .hero-info { flex: 1; min-width: 0; }
+    .hero-name { font-size: 1.5rem; font-weight: 800; color: var(--text); margin-bottom: 0.2rem; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      background: rgba(30,86,255,0.12); border: 1px solid rgba(30,86,255,0.25);
+      border-radius: 50px; padding: 0.2rem 0.7rem;
+      font-size: 0.72rem; font-weight: 700; color: var(--blue-2);
+      letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.75rem;
+    }
+    .hero-stars {
+      display: flex; align-items: center; gap: 0.3rem;
+      font-size: 0.88rem; color: var(--muted); margin-bottom: 0.5rem;
+    }
+    .hero-stars svg { width: 14px; height: 14px; fill: var(--gold); flex-shrink: 0; }
+    .hero-stars strong { color: var(--text); font-size: 1rem; }
+    .hero-meta {
+      display: flex; flex-wrap: wrap; gap: 0.5rem 1.2rem;
+      font-size: 0.82rem; color: var(--muted);
+    }
+    .hero-meta span { display: flex; align-items: center; gap: 0.3rem; }
+    .hero-meta svg { width: 13px; height: 13px; stroke: var(--muted); }
+
+    /* SECTION CARD */
+    .section-card {
+      background: var(--navy-card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.4rem 1.5rem; margin-bottom: 1.2rem;
+      animation: fadeUp .45s cubic-bezier(0.22,1,0.36,1) .08s both;
+    }
+    .section-title { font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: 1rem; }
+    .bio-text { font-size: 0.88rem; color: var(--muted); line-height: 1.65; }
+
+    /* INTERESSE CHIPS */
+    .chips-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .chip {
+      background: rgba(30,86,255,0.1); border: 1px solid rgba(30,86,255,0.2);
+      color: var(--blue-2); font-size: 0.78rem; font-weight: 600;
+      padding: 0.3rem 0.8rem; border-radius: 50px;
+    }
+
+    /* AVALIAÇÕES */
+    .stars-summary { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+    .stars-big { font-size: 1.4rem; font-weight: 800; color: var(--text); }
+    .stars-icons { display: flex; gap: 2px; }
+    .star-svg { width: 15px; height: 15px; }
+    .stars-count-label { font-size: 0.82rem; color: var(--muted); }
+
+    .av-item { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .av-item:last-child { border-bottom: none; }
+    .av-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.45rem; }
+    .av-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 800; color: var(--text); flex-shrink: 0;
+    }
+    .av-nome { font-size: 0.88rem; font-weight: 700; color: var(--text); }
+    .av-data { font-size: 0.74rem; color: var(--muted); }
+    .av-stars-row { display: flex; gap: 2px; margin-left: auto; }
+    .av-star-s { width: 12px; height: 12px; }
+    .av-text { font-size: 0.85rem; color: var(--muted); line-height: 1.55; }
+    .av-empty {
+      text-align: center; padding: 2rem 1rem; color: var(--muted); font-size: 0.88rem;
+    }
+    .av-empty svg { width: 36px; height: 36px; stroke: var(--muted); opacity: 0.4; display: block; margin: 0 auto 0.75rem; }
+
+    /* FORM AVALIAÇÃO */
+    .av-form { margin-top: 1.2rem; padding-top: 1.2rem; border-top: 1px solid var(--border); }
+    .av-form-title { font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 0.85rem; }
+    .stars-select { display: flex; gap: 0.3rem; margin-bottom: 0.75rem; }
+    .star-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 1.4rem; line-height: 1; padding: 0;
+      transition: transform .15s; color: var(--muted);
+    }
+    .star-btn.on { color: var(--gold); }
+    .star-btn:hover { transform: scale(1.15); }
+    .av-textarea {
+      width: 100%; background: var(--navy-input); border: 1px solid var(--border);
+      border-radius: 10px; padding: 0.75rem 1rem; color: var(--text);
+      font-family: inherit; font-size: 0.88rem; resize: vertical;
+      min-height: 80px; outline: none; margin-bottom: 0.75rem;
+      transition: border-color .2s;
+    }
+    .av-textarea:focus { border-color: rgba(30,86,255,0.5); box-shadow: 0 0 0 3px rgba(30,86,255,0.1); }
+    .av-textarea::placeholder { color: rgba(132,148,176,0.4); }
+    .btn-av {
+      background: var(--blue); color: var(--text); border: none;
+      padding: 0.65rem 1.4rem; border-radius: 10px;
+      font-family: inherit; font-size: 0.88rem; font-weight: 700;
+      cursor: pointer; transition: background .18s, transform .18s;
+    }
+    .btn-av:hover { background: #2d64ff; transform: translateY(-1px); }
+    .btn-av:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* TOAST */
+    .toast {
+      position: fixed; top: 1.4rem; left: 50%;
+      transform: translateX(-50%) translateY(-130%);
+      background: #0e2a1a; border: 1px solid rgba(52,211,153,0.3);
+      color: #34d399; padding: 0.8rem 1.5rem; border-radius: 50px;
+      font-size: 0.88rem; font-weight: 600;
+      display: flex; align-items: center; gap: 0.5rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 9999;
+      transition: transform .35s cubic-bezier(0.22,1,0.36,1); white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.erro { background: #2a0e0e; border-color: rgba(248,113,113,0.3); color: #f87171; }
+
+    @media (max-width: 600px) {
+      .hero-card { flex-direction: column; align-items: center; text-align: center; }
+      .hero-meta { justify-content: center; }
+      .page { padding-left: 1rem; padding-right: 1rem; }
+    }
+  </style>
+  <link rel="stylesheet" href="tema.css" />
+  <script src="auth.js"></script>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="plataforma.html" class="nav-logo">FUS<span>HUB</span></a>
+    <a href="javascript:history.back()" class="nav-back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/>
+      </svg>
+      Voltar
+    </a>
+  </nav>
+
+  <div class="page" id="pageContent">
+    <!-- preenchido pelo JS -->
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const CHAVE_AV_PERFIL = email => 'fushub_av_perfil_' + (email || '').toLowerCase().trim();
+
+    function carregarAvaliacoesPerfil(email) {
+      try { return JSON.parse(localStorage.getItem(CHAVE_AV_PERFIL(email)) || '[]'); } catch(e) { return []; }
+    }
+
+    function salvarAvaliacaoPerfil(email, av) {
+      const lista = carregarAvaliacoesPerfil(email);
+      lista.push(av);
+      localStorage.setItem(CHAVE_AV_PERFIL(email), JSON.stringify(lista));
+      return lista;
+    }
+
+    function starsSVG(n, size) {
+      const s = size || 14;
+      return Array.from({length:5}, (_,i) =>
+        `<svg class="av-star-s" viewBox="0 0 24 24" width="${s}" height="${s}">
+          <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
+            fill="${i < n ? '#f5a623' : 'rgba(255,255,255,0.15)'}" stroke="none"/>
+        </svg>`
+      ).join('');
+    }
+
+    let starsSel = 5;
+    function selectStar(n) {
+      starsSel = n;
+      document.querySelectorAll('.star-btn').forEach((btn, i) => btn.classList.toggle('on', i < n));
+    }
+
+    function renderPage() {
+      // Aceita email via ?email= na URL (vindo de mensagens.html) ou sessionStorage (vindo de imovel.html)
+      const urlEmail = new URLSearchParams(window.location.search).get('email');
+      const email = urlEmail || sessionStorage.getItem('fushub_perfil_publico_email');
+      if (!email) { window.location.replace('plataforma.html'); return; }
+
+      const perfil = (() => {
+        try { return JSON.parse(localStorage.getItem('fushub_perfil_publico_' + email.toLowerCase()) || 'null'); }
+        catch(e) { return null; }
+      })();
+
+      if (!perfil) {
+        document.getElementById('pageContent').innerHTML = `
+          <p style="color:var(--muted);text-align:center;padding:4rem 1rem">Perfil não encontrado.</p>`;
+        return;
+      }
+
+      document.title = (perfil.nome || 'Anfitrião') + ' — Fushub';
+
+      const avaliacoes = carregarAvaliacoesPerfil(email);
+      const media = avaliacoes.length
+        ? (avaliacoes.reduce((s,a) => s + (a.stars||5), 0) / avaliacoes.length).toFixed(1)
+        : null;
+
+      // Avatar
+      const avatarHtml = perfil.avatarUrl
+        ? `<img src="${perfil.avatarUrl}" alt="${perfil.nome || ''}" />`
+        : (perfil.nome || 'A').split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+
+      // Meta info
+      const metaItems = [];
+      if (perfil.cidade)     metaItems.push(`<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${perfil.cidade}</span>`);
+      if (perfil.faculdade)  metaItems.push(`<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>${perfil.faculdade}</span>`);
+      if (perfil.curso)      metaItems.push(`<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>${perfil.curso}${perfil.periodo ? ' · ' + perfil.periodo + 'º período' : ''}</span>`);
+
+      // Avaliações HTML
+      let avsHtml = '';
+      if (avaliacoes.length === 0) {
+        avsHtml = `<div class="av-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+          Nenhuma avaliação ainda para este anfitrião
+        </div>`;
+      } else {
+        avsHtml = avaliacoes.map(av => `
+          <div class="av-item">
+            <div class="av-header">
+              <div class="av-avatar" style="background:${av.cor||'var(--blue)'}">${av.iniciais||'U'}</div>
+              <div>
+                <div class="av-nome">${av.nome||'Usuário'}</div>
+                <div class="av-data">${av.data||''}</div>
+              </div>
+              <div class="av-stars-row" style="margin-left:auto">${starsSVG(av.stars||5)}</div>
+            </div>
+            <div class="av-text">${av.texto||''}</div>
+          </div>`).join('');
+      }
+
+      // Form de avaliação (só logados, e não pode avaliar a si mesmo)
+      const user = FushubAuth.getUser();
+      const ehOMesmo = user && user.email.toLowerCase() === email.toLowerCase();
+      let formAvHtml = '';
+      if (user && !ehOMesmo) {
+        formAvHtml = `
+          <div class="av-form">
+            <div class="av-form-title">Deixe sua avaliação sobre este anfitrião</div>
+            <div class="stars-select" id="starsSelect">
+              ${[1,2,3,4,5].map(n => `<button class="star-btn${n<=5?' on':''}" onclick="selectStar(${n})">★</button>`).join('')}
+            </div>
+            <textarea class="av-textarea" id="avTexto" placeholder="Como foi sua experiência com este anfitrião?"></textarea>
+            <button class="btn-av" onclick="enviarAvaliacao('${email}')">Publicar avaliação</button>
+          </div>`;
+      } else if (!user) {
+        formAvHtml = `<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:0.82rem;color:var(--muted)">
+          <a href="entrar.html" style="color:var(--blue-2);font-weight:600">Entre na sua conta</a> para deixar uma avaliação.
+        </div>`;
+      }
+
+      document.getElementById('pageContent').innerHTML = `
+        <!-- HERO -->
+        <div class="hero-card">
+          <div class="hero-avatar">${avatarHtml}</div>
+          <div class="hero-info">
+            <div class="hero-name">${perfil.nome || ''} ${perfil.sobrenome || ''}</div>
+            <div class="hero-badge">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+              Anfitrião Fushub
+            </div>
+            <div class="hero-stars">
+              <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              ${media
+                ? `<strong>${media}</strong> <span>(${avaliacoes.length} avaliação${avaliacoes.length !== 1 ? 'ões' : ''})</span>`
+                : `<span>Sem avaliações ainda</span>`}
+            </div>
+            ${metaItems.length ? `<div class="hero-meta">${metaItems.join('')}</div>` : ''}
+          </div>
+        </div>
+
+        ${perfil.bio ? `
+        <div class="section-card">
+          <div class="section-title">Sobre</div>
+          <p class="bio-text">${perfil.bio}</p>
+        </div>` : ''}
+
+        ${perfil.interesses && perfil.interesses.length ? `
+        <div class="section-card">
+          <div class="section-title">Interesses</div>
+          <div class="chips-list">${perfil.interesses.map(i => `<span class="chip">${i}</span>`).join('')}</div>
+        </div>` : ''}
+
+        <!-- AVALIAÇÕES -->
+        <div class="section-card">
+          <div class="section-title">Avaliações</div>
+          ${avaliacoes.length > 0 ? `
+          <div class="stars-summary">
+            <span class="stars-big">${media}</span>
+            <div class="stars-icons">${starsSVG(Math.round(media))}</div>
+            <span class="stars-count-label">${avaliacoes.length} avaliação${avaliacoes.length !== 1 ? 'ões' : ''}</span>
+          </div>` : ''}
+          ${avsHtml}
+          ${formAvHtml}
+        </div>
+      `;
+
+      // inicia estrelas selecionadas
+      if (user && !ehOMesmo) selectStar(5);
+    }
+
+    function enviarAvaliacao(email) {
+      const user = FushubAuth.getUser();
+      if (!user) { showToast('Entre na sua conta para avaliar.', true); return; }
+      if (!starsSel) { showToast('Selecione uma nota.', true); return; }
+      const texto = document.getElementById('avTexto').value.trim();
+      if (!texto) { showToast('Escreva sua avaliação antes de enviar.', true); return; }
+
+      const nome = [user.nome, user.sobrenome].filter(Boolean).join(' ') || user.email;
+      const iniciais = nome.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+      const cores = ['#1e56ff','#7c3aed','#e11d48','#059669','#d97706'];
+      const cor = cores[nome.charCodeAt(0) % cores.length];
+
+      const _avData = {
+        nome, iniciais, cor, stars: starsSel, texto,
+        data: new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' }),
+      };
+      salvarAvaliacaoPerfil(email, _avData);
+      // Dispara notificação de avaliação recebida
+      if (window.FushubNotif) FushubNotif.avaliacao(email, nome);
+      showToast('Avaliação publicada!');
+      setTimeout(() => renderPage(), 800);
+    }
+
+    function showToast(msg, erro) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast' + (erro ? ' erro' : '');
+      void t.offsetWidth;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    renderPage();
+  </script>
+</body>
+</html>

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Como Funciona — Fushub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ══════════════════════════════════════
+       COMO FUNCIONA — estilos específicos
+       ══════════════════════════════════════ */
+
+    /* Hero da página */
+    .cf-hero {
+      padding: 8rem 5% 5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cf-hero::before {
+      content: ''; position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(30,86,255,0.14) 0%, transparent 70%);
+      top: -100px; left: 50%; transform: translateX(-50%);
+      pointer-events: none;
+    }
+    .cf-hero-label {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(30,86,255,0.1); border: 1px solid rgba(30,86,255,0.2);
+      color: var(--blue-2); font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 0.3rem 1rem; border-radius: 50px; margin-bottom: 1.4rem;
+    }
+    .cf-hero h1 {
+      font-size: clamp(2rem, 5vw, 3.6rem);
+      font-weight: 800; line-height: 1.1;
+      color: var(--text); margin-bottom: 1rem;
+    }
+    .cf-hero h1 em {
+      font-style: normal;
+      background: linear-gradient(90deg, var(--gold), var(--gold-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .cf-hero-sub {
+      font-size: 1.05rem; color: var(--muted);
+      max-width: 520px; margin: 0 auto;
+      line-height: 1.75;
+    }
+
+    /* ── VÍDEO ── */
+    .cf-video-wrap {
+      max-width: 860px; margin: 4rem auto 0;
+      padding: 0 5%;
+    }
+    .cf-video-player {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #f0f4ff;
+      border: 1px solid var(--border-2);
+      box-shadow: var(--shadow-lg);
+      aspect-ratio: 16/9;
+      cursor: pointer;
+    }
+    .cf-video-bg {
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg, #e8eeff 0%, #dce6ff 40%, #eef1ff 100%);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 1rem;
+      position: relative; overflow: hidden;
+    }
+    .cf-video-bg::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(30,86,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(30,86,255,0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .cf-mock-bar {
+      width: 70%; height: 44px;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid var(--border-2);
+      border-radius: 10px;
+      position: absolute; top: 18%; left: 15%;
+      display: flex; align-items: center; gap: 0.7rem;
+      padding: 0 1rem;
+    }
+    .cf-mock-bar-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--blue); opacity: 0.7;
+    }
+    .cf-mock-bar-line {
+      height: 6px; border-radius: 3px;
+      background: rgba(30,86,255,0.12);
+    }
+    .cf-mock-cards {
+      position: absolute; bottom: 22%; left: 50%;
+      transform: translateX(-50%);
+      display: flex; gap: 0.7rem;
+    }
+    .cf-mock-card {
+      width: 100px; height: 70px;
+      background: rgba(255,255,255,0.6);
+      border: 1px solid var(--border-2);
+      border-radius: 10px;
+    }
+    .cf-mock-card:nth-child(2) { background: rgba(30,86,255,0.08); border-color: rgba(30,86,255,0.2); }
+    .cf-play-btn {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2;
+    }
+    .cf-play-circle {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--blue);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 0 16px rgba(30,86,255,0.15), 0 8px 32px rgba(30,86,255,0.4);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .cf-video-player:hover .cf-play-circle {
+      transform: scale(1.08);
+      box-shadow: 0 0 0 20px rgba(30,86,255,0.2), 0 12px 40px rgba(30,86,255,0.5);
+    }
+    .cf-play-circle svg { margin-left: 4px; }
+    .cf-video-caption {
+      text-align: center; margin-top: 1rem;
+      font-size: 0.83rem; color: var(--muted);
+    }
+
+    /* Modal de vídeo */
+    .cf-modal-overlay {
+      position: fixed; inset: 0; z-index: 999;
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s;
+    }
+    .cf-modal-overlay.open { opacity: 1; pointer-events: all; }
+    .cf-modal-box {
+      width: 90%; max-width: 800px;
+      background: var(--bg-card); border: 1px solid var(--border-2);
+      border-radius: 20px; padding: 2rem;
+      transform: scale(0.95); transition: transform .3s;
+      position: relative;
+    }
+    .cf-modal-overlay.open .cf-modal-box { transform: scale(1); }
+    .cf-modal-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: var(--bg-2); border: 1px solid var(--border-2);
+      color: var(--muted); width: 36px; height: 36px;
+      border-radius: 50%; cursor: pointer; font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s, color .2s;
+    }
+    .cf-modal-close:hover { background: var(--border-2); color: var(--text); }
+    .cf-modal-video {
+      aspect-ratio: 16/9; width: 100%;
+      background: #000; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 0.5rem;
+    }
+    .cf-modal-placeholder {
+      text-align: center; color: var(--muted);
+    }
+    .cf-modal-placeholder svg { margin-bottom: 1rem; opacity: 0.4; }
+    .cf-modal-placeholder p { font-size: 0.9rem; }
+    .cf-modal-placeholder strong { color: var(--text); display: block; font-size: 1.1rem; margin-bottom: 0.3rem; }
+
+    /* ── SEÇÕES DE PASSOS ── */
+    .cf-sections {
+      max-width: 1100px; margin: 6rem auto 0;
+      padding: 0 5%;
+    }
+    .cf-section-block {
+      margin-bottom: 5rem;
+    }
+
+    .cf-section-header {
+      display: flex; align-items: center; gap: 1.2rem;
+      margin-bottom: 3rem;
+    }
+    .cf-section-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .cf-section-icon.student { background: rgba(30,86,255,0.12); border: 1px solid rgba(30,86,255,0.2); }
+    .cf-section-icon.owner   { background: rgba(245,166,35,0.1);  border: 1px solid rgba(245,166,35,0.2); }
+    .cf-section-icon svg { width: 24px; height: 24px; }
+    .cf-section-icon.student svg { stroke: var(--blue-2); }
+    .cf-section-icon.owner   svg { stroke: var(--gold); }
+
+    .cf-section-title-wrap h2 {
+      font-size: clamp(1.5rem, 2.5vw, 2rem);
+      font-weight: 800; color: var(--text); line-height: 1.2;
+    }
+    .cf-section-title-wrap p {
+      font-size: 0.9rem; color: var(--muted); margin-top: 0.2rem;
+    }
+
+    .cf-steps {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1rem;
+      position: relative;
+    }
+    .cf-steps::before {
+      content: '';
+      position: absolute;
+      top: 28px; left: calc(10% + 1rem); right: calc(10% + 1rem);
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(30,86,255,0.25), transparent);
+    }
+    .cf-steps.owner-steps::before {
+      background: linear-gradient(90deg, transparent, rgba(245,166,35,0.2), transparent);
+    }
+
+    .cf-step {
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; gap: 1rem;
+      opacity: 0; transform: translateY(20px);
+      transition: opacity .5s ease, transform .5s ease;
+    }
+    .cf-step.visible { opacity: 1; transform: none; }
+
+    .cf-step-num {
+      width: 56px; height: 56px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; position: relative; z-index: 1;
+      font-weight: 800; font-size: 1rem;
+    }
+    .student .cf-step-num {
+      background: #fff;
+      border: 2px solid rgba(30,86,255,0.35);
+      color: var(--blue);
+      box-shadow: 0 0 0 6px rgba(30,86,255,0.07);
+    }
+    .owner .cf-step-num {
+      background: #fff;
+      border: 2px solid rgba(240,165,0,0.4);
+      color: var(--gold);
+      box-shadow: 0 0 0 6px rgba(240,165,0,0.07);
+    }
+
+    .cf-step-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .student .cf-step-icon { background: rgba(30,86,255,0.08); }
+    .owner   .cf-step-icon { background: rgba(245,166,35,0.08); }
+    .student .cf-step-icon svg { stroke: var(--blue-2); }
+    .owner   .cf-step-icon svg { stroke: var(--gold); }
+
+    .cf-step h4 {
+      font-size: 0.88rem; font-weight: 700; color: var(--text); line-height: 1.3;
+    }
+    .cf-step p {
+      font-size: 0.78rem; color: var(--muted); line-height: 1.6;
+    }
+
+    .cf-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0 0 5rem;
+    }
+
+    .cf-cta {
+      text-align: center;
+      padding: 5rem 5%;
+      background: var(--bg-2);
+      border-top: 1px solid var(--border);
+    }
+    .cf-cta h2 {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 800; color: var(--text); margin-bottom: 0.8rem;
+    }
+    .cf-cta p {
+      font-size: 0.97rem; color: var(--muted); margin-bottom: 2rem;
+    }
+    .cf-cta-btns {
+      display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+    }
+
+    @media (max-width: 900px) {
+      .cf-steps {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.2rem;
+      }
+      .cf-steps::before { display: none; }
+    }
+    @media (max-width: 560px) {
+      .cf-steps { grid-template-columns: 1fr; }
+      .cf-step { flex-direction: row; text-align: left; align-items: flex-start; }
+      .cf-step-num { flex-shrink: 0; }
+    }
+  </style>
+  <link rel="stylesheet" href="tema.css" />
+</head>
+<body>
+
+  <!-- NAV — botão de tema REMOVIDO (resquício apagado) -->
+  <nav id="navbar">
+    <a href="index.html" class="logo">FUS<span>HUB</span></a>
+    <div class="nav-right">
+      <button class="btn-entrar">Entrar</button>
+      <button class="btn-cadastrar">Cadastrar</button>
+      <button class="hamburger" id="hamburger">☰</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="cf-hero">
+    <div class="cf-hero-label">Guia da plataforma</div>
+    <h1>Como Funciona<br>o <em>Fushub</em></h1>
+    <p class="cf-hero-sub">Entenda como encontrar ou anunciar moradia no site. Simples, rápido e seguro para estudantes e proprietários.</p>
+  </div>
+
+  <!-- VÍDEO -->
+  <div class="cf-video-wrap">
+    <div class="cf-video-player" onclick="openModal()">
+      <div class="cf-video-bg">
+        <div class="cf-mock-bar">
+          <div class="cf-mock-bar-dot"></div>
+          <div class="cf-mock-bar-line" style="width:38%; flex-shrink:0;"></div>
+          <div class="cf-mock-bar-line" style="width:20%; flex-shrink:0; opacity:.5;"></div>
+        </div>
+        <div class="cf-mock-cards">
+          <div class="cf-mock-card"></div>
+          <div class="cf-mock-card"></div>
+          <div class="cf-mock-card"></div>
+        </div>
+      </div>
+      <div class="cf-play-btn">
+        <div class="cf-play-circle">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff">
+            <polygon points="5,3 19,12 5,21"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <p class="cf-video-caption">▶ Clique para assistir ao vídeo demonstrativo da plataforma</p>
+  </div>
+
+  <!-- Modal de vídeo -->
+  <div class="cf-modal-overlay" id="videoModal" onclick="closeModalOutside(event)">
+    <div class="cf-modal-box">
+      <button class="cf-modal-close" onclick="closeModal()">✕</button>
+      <div class="cf-modal-video">
+        <div class="cf-modal-placeholder">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polygon points="10,8 16,12 10,16"/>
+          </svg>
+          <strong>Vídeo em produção</strong>
+          <p>O vídeo demonstrativo estará disponível em breve.<br>Acompanhe nosso Instagram <a href="https://instagram.com/fushub_" target="_blank" style="color:var(--gold)">@fushub_</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEÇÕES DE PASSOS -->
+  <div class="cf-sections">
+
+    <!-- ESTUDANTE -->
+    <div class="cf-section-block student">
+      <div class="cf-section-header">
+        <div class="cf-section-icon student">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+          </svg>
+        </div>
+        <div class="cf-section-title-wrap">
+          <h2>Sou estudante</h2>
+          <p>Encontre sua moradia ideal em 5 passos simples</p>
+        </div>
+      </div>
+
+      <div class="cf-steps">
+        <div class="cf-step">
+          <div class="cf-step-num">1</div>
+          <div class="cf-step-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div>
+            <h4>Crie sua conta</h4>
+            <p>Cadastre-se gratuitamente em menos de 2 minutos</p>
+          </div>
+        </div>
+        <div class="cf-step">
+          <div class="cf-step-num">2</div>
+          <div class="cf-step-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+          <div>
+            <h4>Busque com filtros</h4>
+            <p>Filtre por preço, localização e tipo de moradia</p>
+          </div>
+        </div>
+        <div class="cf-step">
+          <div class="cf-step-num">3</div>
+          <div class="cf-step-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/>
+            </svg>
+          </div>
+          <div>
+            <h4>Veja fotos e avaliações</h4>
+            <p>Fotos reais e notas de quem já morou no local</p>
+          </div>
+        </div>
+        <div class="cf-step">
+          <div class="cf-step-num">4</div>
+          <div class="cf-step-icon">
+            <!-- Chat bubble — igual ao original -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+            </svg>
+          </div>
+          <div>
+            <h4>Entre em contato</h4>
+            <p>Fale direto com o proprietário pelo chat integrado</p>
+          </div>
+        </div>
+        <div class="cf-step">
+          <div class="cf-step-num">5</div>
+          <div class="cf-step-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20,6 9,17 4,12"/>
+            </svg>
+          </div>
+          <div>
+            <h4>Feche o acordo</h4>
+            <p>Assine o contrato digital e garanta sua moradia</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cf-divider"></div>
+
+    <!-- PROPRIETÁRIO -->
+    <div class="cf-section-block owner">
+      <div class="cf-section-header">
+        <div class="cf-section-icon owner">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/>
+          </svg>
+        </div>
+        <div class="cf-section-title-wrap">
+          <h2>Sou proprietário</h2>
+          <p>Anuncie seu imóvel e alcance milhares de estudantes</p>
+        </div>
+      </div>
+
+      <div class="cf-steps owner-steps">
+        <div class="cf-step">
+          <div class="cf-step-num">1</div>
+          <div class="cf-step-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div>
+            <h4>Crie sua conta</h4>
+            <p>Cadastre-se gratuitamente e vire anfitrião pelo seu perfil</p>
+          </div>
+        </div>
+        <div class="cf-step">
+          <div class="cf-step-num">2</div>
+          <div class="cf-step-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <div>
+            <h4>Cadastre seu imóvel</h4>
+            <p>Preencha as informações e detalhes da propriedade</p>
+          </div>
+        </div>
+        <div class="cf-step">
+          <div class="cf-step-num">3</div>
+          <div class="cf-step-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/>
+            </svg>
+          </div>
+          <div>
+            <h4>Adicione fotos</h4>
+            <p>Fotos reais aumentam muito as chances de contato</p>
+          </div>
+        </div>
+
+        <!-- PASSO 4 PROPRIETÁRIO — ícone de chat (igual ao estudante, sem telefone quebrado) -->
+        <div class="cf-step">
+          <div class="cf-step-num">4</div>
+          <div class="cf-step-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+            </svg>
+          </div>
+          <div>
+            <h4>Receba contatos</h4>
+            <p>Estudantes interessados entram em contato direto</p>
+          </div>
+        </div>
+
+        <!-- PASSO 5 PROPRIETÁRIO — ícone de lista/clipboard (mais adequado para "Gerencie propostas") -->
+        <div class="cf-step">
+          <div class="cf-step-num">5</div>
+          <div class="cf-step-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+              <rect x="9" y="3" width="6" height="4" rx="1"/>
+              <line x1="9" y1="12" x2="15" y2="12"/>
+              <line x1="9" y1="16" x2="13" y2="16"/>
+            </svg>
+          </div>
+          <div>
+            <h4>Gerencie propostas</h4>
+            <p>Painel completo para acompanhar e fechar negócios</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <p class="footer-left">
+        © 2026 Fushub ·
+        <a href="#">Privacidade</a> ·
+        <a href="#">Termos</a> ·
+        <a href="#">Informações da empresa</a>
+      </p>
+      <div class="footer-socials">
+        <a href="https://www.instagram.com/_fushub?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" title="Instagram">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+          </svg>
+        </a>
+        <a href="https://www.linkedin.com/in/fushub-%E2%A0%80-7a0a84387/" target="_blank" title="LinkedIn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/>
+            <rect x="2" y="9" width="4" height="12"/>
+            <circle cx="4" cy="4" r="2"/>
+          </svg>
+        </a>
+        <a href="https://www.tiktok.com/@fushub_?is_from_webapp=1&sender_device=pc" target="_blank" title="TikTok">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.75a4.85 4.85 0 01-1.01-.06z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+  <script>
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').style.boxShadow =
+        window.scrollY > 30 ? '0 4px 20px rgba(0,0,0,0.1)' : 'none';
+    });
+
+    function openModal() {
+      document.getElementById('videoModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      document.getElementById('videoModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function closeModalOutside(e) {
+      if (e.target === document.getElementById('videoModal')) closeModal();
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    const stepObs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const steps = entry.target.querySelectorAll('.cf-step');
+          steps.forEach((s, i) => {
+            setTimeout(() => s.classList.add('visible'), i * 110);
+          });
+          stepObs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.cf-steps').forEach(el => stepObs.observe(el));
+  </script>
+</body>
+</html>

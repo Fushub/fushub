@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fushub — Favoritos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:       #1e56ff;
+      --blue-2:     #3b73ff;
+      --blue-light: rgba(30,86,255,0.1);
+      --gold:       #f0a500;
+      --navy:       #f5f7fc;
+      --navy-2:     #eef1f8;
+      --navy-card:  #ffffff;
+      --border:     rgba(0,0,0,0.08);
+      --muted:      #6b7fa3;
+      --text:       #1a2540;
+      --white:      #ffffff;
+      --nav-h:      74px;
+      --pink:       #ff4a6b;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--navy);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* ═══════════════════════════════════
+       NAVBAR
+    ═══════════════════════════════════ */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      height: var(--nav-h);
+      background: var(--navy-2);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 2rem;
+      gap: 1rem;
+    }
+
+    .nav-logo {
+      font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em;
+      color: var(--text); text-decoration: none; flex-shrink: 0;
+    }
+    .nav-logo span { color: var(--gold); }
+
+    .nav-tabs {
+      flex: 1; display: flex; justify-content: center; gap: 0;
+    }
+    .nav-tab {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 0.2rem; padding: 0.5rem 1.6rem;
+      color: var(--muted); text-decoration: none;
+      font-size: 0.88rem; font-weight: 600;
+      border-bottom: 2px solid transparent;
+      transition: color .2s, border-color .2s;
+      cursor: pointer; white-space: nowrap;
+    }
+    .nav-tab svg { width: 22px; height: 22px; }
+    .nav-tab.active { color: var(--text); border-bottom-color: var(--blue); }
+    .nav-tab:hover:not(.active) { color: var(--text); }
+
+    .nav-right {
+      display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0;
+    }
+
+    .nav-profile {
+      display: flex; align-items: center; gap: 0.6rem;
+      background: var(--navy-card); border: 1px solid var(--border);
+      border-radius: 50px; padding: 0.3rem 0.5rem 0.3rem 0.9rem;
+      cursor: pointer; transition: box-shadow .2s, border-color .2s;
+      position: relative;
+    }
+    .nav-profile:hover {
+      border-color: rgba(255,255,255,0.18);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+    .nav-profile-menu-icon { color: var(--muted); }
+    .nav-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--blue);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 800; color: #fff; flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .profile-dropdown {
+      position: absolute; top: calc(100% + 0.6rem); right: 0;
+      background: var(--navy-card); border: 1px solid var(--border);
+      border-radius: 16px; min-width: 200px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+      overflow: hidden;
+      opacity: 0; pointer-events: none;
+      transform: translateY(-8px);
+      transition: opacity .2s, transform .2s;
+      z-index: 200;
+    }
+    .nav-profile.open .profile-dropdown { opacity: 1; pointer-events: all; transform: none; }
+    .dropdown-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.75rem 1.1rem;
+      font-size: 0.85rem; color: var(--text);
+      cursor: pointer; transition: background .15s; text-decoration: none;
+    }
+    .dropdown-item:hover { background: rgba(0,0,0,0.04); }
+    .dropdown-item svg { width: 16px; height: 16px; stroke: var(--muted); flex-shrink: 0; }
+    .dropdown-divider { height: 1px; background: var(--border); margin: 0.3rem 0; }
+    .dropdown-item.logout { color: #f87171; }
+    .dropdown-item.logout svg { stroke: #f87171; }
+    .dropdown-item.active-page { color: var(--pink); background: rgba(255,74,107,0.06); }
+    .dropdown-item.active-page svg { stroke: var(--pink); }
+
+    /* ═══════════════════════════════════
+       PAGE HEADER
+    ═══════════════════════════════════ */
+    .page-header {
+      padding-top: calc(var(--nav-h) + 3rem);
+      padding-bottom: 0;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+
+    .header-top {
+      display: flex; align-items: center; gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .header-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      background: rgba(255,74,107,0.12);
+      border: 1px solid rgba(255,74,107,0.2);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .header-icon svg { width: 24px; height: 24px; stroke: var(--pink); fill: rgba(255,74,107,0.15); }
+
+    .header-title {
+      font-size: 1.9rem; font-weight: 800;
+      color: var(--text); letter-spacing: -0.03em; line-height: 1;
+    }
+
+    .header-sub {
+      font-size: 0.9rem; color: var(--muted); margin-top: 0.3rem;
+    }
+
+    .header-count {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: rgba(255,74,107,0.1); border: 1px solid rgba(255,74,107,0.2);
+      border-radius: 50px; padding: 0.25rem 0.8rem;
+      font-size: 0.78rem; font-weight: 700; color: var(--pink);
+      margin-left: 0.75rem; vertical-align: middle;
+    }
+
+    .divider-line {
+      height: 1px; background: var(--border);
+      margin: 1.8rem 0 2rem;
+    }
+
+    /* ═══════════════════════════════════
+       SORT BAR
+    ═══════════════════════════════════ */
+    .sort-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;
+    }
+
+    .sort-label {
+      font-size: 0.82rem; color: var(--muted); font-weight: 600;
+    }
+
+    .sort-btns {
+      display: flex; gap: 0.4rem;
+    }
+
+    .sort-btn {
+      padding: 0.35rem 0.85rem;
+      background: var(--navy-card); border: 1px solid var(--border);
+      border-radius: 50px; font-size: 0.78rem; font-weight: 600;
+      color: var(--muted); cursor: pointer;
+      transition: all .15s; font-family: inherit;
+    }
+    .sort-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.18); }
+    .sort-btn.active {
+      background: rgba(255,74,107,0.12); border-color: rgba(255,74,107,0.3);
+      color: var(--pink);
+    }
+
+    /* ═══════════════════════════════════
+       MAIN CONTENT
+    ═══════════════════════════════════ */
+    .main {
+      padding-bottom: 5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+
+    .imoveis-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* ═══════════════════════════════════
+       CARDS
+    ═══════════════════════════════════ */
+    .imovel-card {
+      cursor: pointer;
+      transition: transform .2s;
+      animation: fadeInUp .35s ease both;
+    }
+    .imovel-card:hover { transform: translateY(-3px); }
+    .imovel-card:hover .card-img { box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-img {
+      width: 100%; aspect-ratio: 4/3;
+      border-radius: 16px; overflow: hidden; position: relative;
+      transition: box-shadow .2s;
+    }
+    .card-img-bg {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3.5rem;
+    }
+
+    .card-fav {
+      position: absolute; top: 0.7rem; right: 0.7rem;
+      background: rgba(255,74,107,0.15); border: 1px solid rgba(255,74,107,0.35);
+      backdrop-filter: blur(8px);
+      border-radius: 50%; width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--pink); font-size: 1.1rem;
+      transition: transform .2s, background .2s;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+    }
+    .card-fav:hover { transform: scale(1.15); background: rgba(255,74,107,0.25); }
+
+    .card-badge {
+      position: absolute; top: 0.7rem; left: 0.7rem;
+      background: rgba(15,28,53,0.85); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px; padding: 0.2rem 0.5rem;
+      font-size: 0.68rem; font-weight: 700; color: var(--text); letter-spacing: 0.03em;
+    }
+
+    .card-body { padding: 0.75rem 0.2rem 0; }
+    .card-top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 0.5rem; margin-bottom: 0.2rem;
+    }
+    .card-title { font-size: 0.9rem; font-weight: 700; color: var(--text); line-height: 1.3; flex: 1; }
+    .card-stars {
+      font-size: 0.8rem; color: var(--muted);
+      display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0;
+    }
+    .card-stars svg { width: 12px; height: 12px; fill: var(--gold); stroke: none; }
+    .card-loc { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.4rem; }
+    .card-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.6rem; align-items: center; }
+    .card-tag {
+      font-size: 0.68rem; font-weight: 600;
+      background: rgba(30,86,255,0.1); color: var(--blue-2);
+      border: 1px solid rgba(30,86,255,0.2);
+      padding: 0.15rem 0.5rem; border-radius: 4px;
+    }
+    .card-tag-extra { font-size: 0.7rem; color: var(--muted); font-weight: 500; }
+    .card-bottom {
+      display: flex; align-items: center; justify-content: space-between; margin-top: 0.2rem;
+    }
+    .card-price { font-size: 0.9rem; color: var(--text); }
+    .card-price strong { font-size: 1rem; font-weight: 800; color: var(--text); }
+    .card-price span { font-size: 0.72rem; color: var(--muted); margin-left: 0.2rem; }
+    .card-btn-detalhes {
+      background: var(--gold); color: var(--navy); border: none; border-radius: 10px;
+      padding: 0.45rem 0.9rem; font-family: inherit; font-size: 0.78rem; font-weight: 800;
+      cursor: pointer; transition: filter .18s, transform .18s; white-space: nowrap;
+    }
+    .card-btn-detalhes:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    /* image gradients */
+    .img-1  { background: linear-gradient(135deg, #1a3a6b 0%, #0d2347 50%, #162d55 100%); }
+    .img-2  { background: linear-gradient(135deg, #0d3326 0%, #0a2a1e 50%, #143d2e 100%); }
+    .img-3  { background: linear-gradient(135deg, #2d1a4a 0%, #1e1035 50%, #2a1845 100%); }
+    .img-4  { background: linear-gradient(135deg, #3d1a1a 0%, #2a0f0f 50%, #3a1515 100%); }
+    .img-5  { background: linear-gradient(135deg, #1a3d3d 0%, #0f2929 50%, #153535 100%); }
+    .img-6  { background: linear-gradient(135deg, #2d2a0a 0%, #1e1c05 50%, #28250a 100%); }
+    .img-7  { background: linear-gradient(135deg, #0d1e3d 0%, #07152d 50%, #0f1e3a 100%); }
+    .img-8  { background: linear-gradient(135deg, #1a0d3d 0%, #13082d 50%, #18103a 100%); }
+
+    /* ═══════════════════════════════════
+       EMPTY STATE
+    ═══════════════════════════════════ */
+    .empty-state {
+      text-align: center;
+      padding: 6rem 2rem;
+      color: var(--muted);
+      animation: fadeInUp .4s ease both;
+    }
+    .empty-heart {
+      width: 80px; height: 80px;
+      background: rgba(255,74,107,0.08);
+      border: 1px solid rgba(255,74,107,0.15);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+    .empty-heart svg { width: 36px; height: 36px; stroke: var(--pink); opacity: 0.5; }
+    .empty-state h3 {
+      font-size: 1.3rem; font-weight: 800; color: var(--text);
+      margin-bottom: 0.5rem; letter-spacing: -0.02em;
+    }
+    .empty-state p {
+      font-size: 0.9rem; color: var(--muted);
+      max-width: 300px; margin: 0 auto 2rem; line-height: 1.6;
+    }
+    .btn-explorar {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--blue); color: #fff; border: none;
+      border-radius: 12px; padding: 0.75rem 1.5rem;
+      font-family: inherit; font-size: 0.9rem; font-weight: 700;
+      cursor: pointer; text-decoration: none;
+      transition: background .2s, transform .15s;
+    }
+    .btn-explorar:hover { background: #2d64ff; transform: translateY(-1px); }
+    .btn-explorar svg { width: 16px; height: 16px; stroke: #fff; }
+
+    /* ═══════════════════════════════════
+       REMOVE TOAST
+    ═══════════════════════════════════ */
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%;
+      transform: translateX(-50%) translateY(0);
+      background: var(--navy-card);
+      border: 1px solid rgba(255,74,107,0.3);
+      border-radius: 12px; padding: 0.75rem 1.25rem;
+      display: flex; align-items: center; gap: 0.6rem;
+      font-size: 0.85rem; font-weight: 600; color: var(--text);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      z-index: 500;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s, transform .25s;
+    }
+    .toast.show { opacity: 1; }
+    .toast svg { width: 16px; height: 16px; stroke: var(--pink); flex-shrink: 0; }
+
+    /* ═══════════════════════════════════
+       MODAL DETALHE
+    ═══════════════════════════════════ */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: var(--navy-card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 0;
+      width: 90%; max-width: 480px; overflow: hidden;
+      transform: translateY(20px); transition: transform .25s;
+    }
+    .modal-overlay.open .modal-box { transform: none; }
+
+    .modal-img {
+      width: 100%; aspect-ratio: 16/9;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 5rem; position: relative;
+    }
+    .modal-body { padding: 1.5rem; }
+    .modal-title-row {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 1rem; margin-bottom: 0.4rem;
+    }
+    .modal-imovel-title { font-size: 1.15rem; font-weight: 800; color: var(--text); line-height: 1.3; }
+    .modal-stars {
+      display: flex; align-items: center; gap: 0.25rem;
+      font-size: 0.85rem; color: var(--muted); flex-shrink: 0;
+    }
+    .modal-stars svg { width: 14px; height: 14px; fill: var(--gold); stroke: none; }
+    .modal-loc { font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem; }
+    .modal-tags { display: flex; gap: 0.4rem; margin-bottom: 1rem; }
+    .modal-tag {
+      font-size: 0.72rem; font-weight: 600;
+      background: rgba(30,86,255,0.1); color: var(--blue-2);
+      border: 1px solid rgba(30,86,255,0.2);
+      padding: 0.2rem 0.6rem; border-radius: 4px;
+    }
+    .modal-price { font-size: 1rem; color: var(--text); margin-bottom: 1.5rem; }
+    .modal-price strong { font-size: 1.4rem; font-weight: 800; color: var(--text); }
+    .modal-actions { display: flex; gap: 0.75rem; }
+    .btn-contato {
+      flex: 1; padding: 0.8rem;
+      background: var(--blue); color: #fff; border: none;
+      border-radius: 12px; font-family: inherit;
+      font-size: 0.9rem; font-weight: 700; cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-contato:hover { background: #2d64ff; }
+    .btn-remover {
+      padding: 0.8rem 1.1rem;
+      background: rgba(255,74,107,0.1); color: var(--pink);
+      border: 1px solid rgba(255,74,107,0.25);
+      border-radius: 12px; font-family: inherit;
+      font-size: 0.85rem; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; gap: 0.4rem;
+      transition: background .2s;
+    }
+    .btn-remover:hover { background: rgba(255,74,107,0.2); }
+    .btn-remover svg { width: 15px; height: 15px; stroke: var(--pink); }
+    .modal-close-btn {
+      position: absolute; top: 0.75rem; right: 0.75rem;
+      background: rgba(15,28,53,0.8); backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.1);
+      width: 32px; height: 32px; border-radius: 50%;
+      cursor: pointer; color: var(--text); font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s;
+    }
+    .modal-close-btn:hover { background: rgba(255,255,255,0.15); }
+
+    @media (max-width: 768px) {
+      .nav-tabs .nav-tab span { display: none; }
+      .main, .page-header { padding-left: 1rem; padding-right: 1rem; }
+      .imoveis-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+      .header-title { font-size: 1.5rem; }
+    }
+    @media (max-width: 500px) {
+      .navbar { padding: 0 1rem; }
+      .imoveis-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+  <link rel="stylesheet" href="tema.css" />
+  <script src="auth.js"></script>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="plataforma.html" class="nav-logo">FUS<span style="color:var(--gold)">HUB</span></a>
+
+    <div class="nav-tabs">
+      <a class="nav-tab" href="plataforma.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+        <span>Buscar Vagas</span>
+      </a>
+      <a class="nav-tab active" href="favoritos.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        <span>Favoritos</span>
+      </a>
+      <a class="nav-tab" href="mensagens.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <span>Mensagens</span>
+      </a>
+    </div>
+
+    <div class="nav-right">
+      <div class="nav-profile" id="navProfile" onclick="toggleProfileMenu()">
+        <svg class="nav-profile-menu-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+        <div class="nav-avatar" id="navAvatar">JS</div>
+
+                <div class="profile-dropdown">
+          <a href="perfil.html" class="dropdown-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Meu perfil
+          </a>
+          <a href="configuracoes.html" class="dropdown-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+            Configurações
+          </a>
+          <div class="dropdown-divider"></div>
+          <a href="anunciar.html" class="dropdown-item" id="linkAnfitriao">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+            Tornar-se anfitrião
+          </a>
+          <div class="dropdown-divider"></div>
+          <a href="#" onclick="logout()" class="dropdown-item logout">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sair
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="header-top">
+      <div class="header-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+        </svg>
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:0.2rem">
+          <h1 class="header-title">Meus Favoritos</h1>
+          <span class="header-count" id="favCount">0 imóveis</span>
+        </div>
+        <p class="header-sub">Imóveis que você salvou para ver depois</p>
+      </div>
+    </div>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- SORT BAR -->
+    <div class="sort-bar" id="sortBar" style="display:none">
+      <span class="sort-label">Ordenar por</span>
+      <div class="sort-btns">
+        <button class="sort-btn active" onclick="sortFavs('recente', this)">Mais recentes</button>
+        <button class="sort-btn" onclick="sortFavs('preco_asc', this)">Menor preço</button>
+        <button class="sort-btn" onclick="sortFavs('preco_desc', this)">Maior preço</button>
+        <button class="sort-btn" onclick="sortFavs('stars', this)">Melhor avaliados</button>
+      </div>
+    </div>
+
+    <div class="imoveis-grid" id="favGrid"></div>
+  </main>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+    </svg>
+    <span id="toastMsg">Removido dos favoritos</span>
+  </div>
+
+  <!-- MODAL DETALHE -->
+  <div class="modal-overlay" id="detailModal" onclick="closeModalOutside(event)">
+    <div class="modal-box">
+      <div class="modal-img" id="modalImg" style="position:relative">
+        <button class="modal-close-btn" onclick="closeModal()">✕</button>
+        <span id="modalEmoji" style="font-size:5rem"></span>
+      </div>
+      <div class="modal-body">
+        <div class="modal-title-row">
+          <div class="modal-imovel-title" id="modalTitle"></div>
+          <div class="modal-stars">
+            <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+            <span id="modalStars"></span>
+            <span id="modalReviews" style="color:var(--muted);font-size:.75rem"></span>
+          </div>
+        </div>
+        <div class="modal-loc" id="modalLoc"></div>
+        <div class="modal-tags"><span class="modal-tag" id="modalTipo"></span></div>
+        <div class="modal-price">R$ <strong id="modalPreco"></strong>/mês</div>
+        <div class="modal-actions">
+          <button class="btn-contato">
+            Entrar em contato
+          </button>
+          <button class="btn-remover" id="btnRemoverModal" onclick="removerDoModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" fill="rgba(255,74,107,0.2)"/>
+            </svg>
+            Remover
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function carregarTodosImoveis() {
+      return FushubAuth.getTodosImoveis();
+    }
+
+    let IMOVEIS = carregarTodosImoveis();
+
+    // ── Avaliações reais — mesma chave do imovel.html ─────────────────
+    function carregarAvaliacoes(id) {
+      try { return JSON.parse(localStorage.getItem('fushub_av_' + String(id)) || '[]'); } catch(e) { return []; }
+    }
+    function calcStarsReais(im) {
+      const avs = carregarAvaliacoes(im.id);
+      const todas = [...(im.avaliacoes || []), ...avs];
+      if (todas.length === 0) return { media: im.stars || 0, total: im.reviews || 0 };
+      const media = (todas.reduce((s, a) => s + (a.stars || 5), 0) / todas.length).toFixed(1);
+      return { media: parseFloat(media), total: todas.length };
+    }
+
+    // Favs: persistidos no localStorage, IDs sempre como string
+    const _favsRaw = JSON.parse(localStorage.getItem('fushub_favs') || '[]');
+    let favs = new Set(_favsRaw.map(String));
+    let currentModalId = null;
+    let currentSort = 'recente';
+
+    function getFavImoveis() {
+      IMOVEIS = carregarTodosImoveis();
+      let lista = IMOVEIS.filter(im => favs.has(String(im.id)));
+      if (currentSort === 'preco_asc')  lista.sort((a,b) => a.preco - b.preco);
+      if (currentSort === 'preco_desc') lista.sort((a,b) => b.preco - a.preco);
+      if (currentSort === 'stars')      lista.sort((a,b) => b.stars - a.stars);
+      return lista;
+    }
+
+    function saveFavs() {
+      localStorage.setItem('fushub_favs', JSON.stringify([...favs]));
+    }
+
+    function renderFavs() {
+      const lista = getFavImoveis();
+      const grid = document.getElementById('favGrid');
+      const sortBar = document.getElementById('sortBar');
+      const countEl = document.getElementById('favCount');
+
+      const n = lista.length;
+      countEl.textContent = n === 1 ? '1 imóvel' : `${n} imóveis`;
+
+      sortBar.style.display = n > 0 ? 'flex' : 'none';
+
+      if (n === 0) {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1">
+            <div class="empty-heart">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+              </svg>
+            </div>
+            <h3>Nenhum favorito ainda</h3>
+            <p>Explore os imóveis disponíveis e toque no coração para salvar os que mais gostar.</p>
+            <a href="plataforma.html" class="btn-explorar">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              Explorar imóveis
+            </a>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = lista.map((im, i) => `
+        <div class="imovel-card" style="animation-delay:${i * 0.06}s">
+          <div class="card-img">
+            ${im.imgCustom
+              ? `<div class="card-img-bg" style="background-image:url('${im.imgCustom}');background-size:cover;background-position:center;"></div>`
+              : `<div class="card-img-bg ${im.img}">${im.emoji}</div>`
+            }
+            
+            <button class="card-fav" onclick="removerFav(event,'${im.id}')" title="Remover dos favoritos">♥</button>
+          </div>
+          <div class="card-body">
+            <div class="card-top">
+              <div class="card-title">${im.titulo}</div>
+              <div class="card-stars">
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                ${(() => { const s = calcStarsReais(im); return s.total > 0 ? `${s.media} <span style="color:var(--muted);font-size:.72rem">(${s.total})</span>` : '—'; })()}
+              </div>
+            </div>
+            <div class="card-loc">${im.loc}</div>
+            <div class="card-tags">
+              <span class="card-tag">${im.tipo}</span>
+              ${im.comodidades && im.comodidades.length > 0 ? `<span class="card-tag-extra">+${im.comodidades.length} comodidade${im.comodidades.length > 1 ? 's' : ''}</span>` : ''}
+            </div>
+            <div class="card-bottom">
+              <div class="card-price">R$ <strong>${im.preco.toLocaleString('pt-BR')}</strong><span>/mês</span></div>
+              <button class="card-btn-detalhes" onclick="irParaImovel('${im.id}')">Ver Detalhes</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function removerFav(e, id) {
+      e.stopPropagation();
+      favs.delete(String(id));
+      saveFavs();
+      renderFavs();
+      showToast('Removido dos favoritos');
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    function sortFavs(type, el) {
+      currentSort = type;
+      document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      renderFavs();
+    }
+
+    function irParaImovel(id) {
+      sessionStorage.setItem('fushub_imovel_id', String(id));
+      window.location.href = 'imovel.html';
+    }
+
+    function removerDoModal() {
+      favs.delete(String(currentModalId));
+      saveFavs();
+      closeModal();
+      renderFavs();
+      showToast('Removido dos favoritos');
+    }
+
+    function closeModal() {
+      document.getElementById('detailModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function closeModalOutside(e) {
+      if (e.target === document.getElementById('detailModal')) closeModal();
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    function toggleProfileMenu() {
+      document.getElementById('navProfile').classList.toggle('open');
+    }
+    document.addEventListener('click', e => {
+      const p = document.getElementById('navProfile');
+      if (p && !p.contains(e.target)) p.classList.remove('open');
+    });
+
+
+    // Esconde "Tornar-se anfitrião" se o usuário já for anfitrião
+    (function() {
+      var lnk = document.getElementById('linkAnfitriao');
+      if (lnk && typeof FushubAuth !== 'undefined' && FushubAuth.isAnfitriao()) {
+        lnk.style.display = 'none';
+        var prev = lnk.previousElementSibling;
+        if (prev && prev.classList.contains('dropdown-divider')) prev.style.display = 'none';
+      }
+    })();
+
+    function logout() { FushubAuth.logout(); }
+
+    // Avatar preenchido pelo auth.js
+
+    renderFavs();
+  </script>
+</body>
+</html>

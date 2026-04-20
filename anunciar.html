@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anunciar Imóvel — Fushub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:       #1e56ff;
+      --blue-2:     #3b73ff;
+      --gold:       #f0a500;
+      --navy:       #f5f7fc;
+      --navy-2:     #eef1f8;
+      --navy-card:  #ffffff;
+      --navy-input: #f0f3fa;
+      --border:     rgba(0,0,0,0.08);
+      --border-focus: rgba(30,86,255,0.45);
+      --muted:      #6b7fa3;
+      --text:       #1a2540;
+      --nav-h:      74px;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--navy); color: var(--text);
+      -webkit-font-smoothing: antialiased; min-height: 100vh;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: radial-gradient(rgba(30,86,255,0.06) 1px, transparent 1px);
+      background-size: 28px 28px; pointer-events: none; z-index: 0;
+    }
+
+    /* NAV */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: var(--nav-h); background: var(--navy-2);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 2rem; gap: 1rem;
+    }
+    .nav-logo { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text); text-decoration: none; flex-shrink: 0; }
+    .nav-logo span { color: var(--gold); }
+    .nav-back {
+      display: flex; align-items: center; gap: 0.5rem;
+      color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 600;
+      padding: 0.4rem 0.8rem; border-radius: 50px; border: 1px solid var(--border);
+      background: var(--navy-card); transition: color .2s, border-color .2s; margin-left: auto;
+    }
+    .nav-back:hover { color: var(--text); border-color: rgba(255,255,255,0.18); }
+    .nav-back:hover svg { transform: translateX(-2px); }
+    .nav-back svg { transition: transform .2s; }
+
+    /* HERO */
+    .hero {
+      position: relative; z-index: 1;
+      padding: calc(var(--nav-h) + 3.5rem) 2rem 3rem;
+      text-align: center; max-width: 700px; margin: 0 auto;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(30,86,255,0.12); border: 1px solid rgba(30,86,255,0.25);
+      border-radius: 50px; padding: 0.35rem 1rem;
+      font-size: 0.75rem; font-weight: 700; color: var(--blue-2);
+      letter-spacing: 0.06em; text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem); font-weight: 800;
+      color: var(--text); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 0.8rem;
+    }
+    .hero h1 span { color: var(--gold); }
+    .hero p { font-size: 1rem; color: var(--muted); line-height: 1.6; }
+
+    /* FORM CONTAINER */
+    .form-wrap {
+      position: relative; z-index: 1;
+      max-width: 760px; margin: 0 auto;
+      padding: 0 2rem 5rem;
+    }
+
+    .form-card {
+      background: var(--navy-card); border: 1px solid var(--border);
+      border-radius: 24px; padding: 2.2rem 2.4rem; margin-bottom: 1.2rem;
+      opacity: 0; transform: translateY(20px);
+      animation: fadeUp .5s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    .form-card:nth-child(1) { animation-delay: .05s; }
+    .form-card:nth-child(2) { animation-delay: .12s; }
+    .form-card:nth-child(3) { animation-delay: .18s; }
+    .form-card:nth-child(4) { animation-delay: .24s; }
+    .form-card:nth-child(5) { animation-delay: .30s; }
+    .form-card:nth-child(6) { animation-delay: .36s; }
+    .form-card:nth-child(7) { animation-delay: .42s; }
+    @keyframes fadeUp { to { opacity: 1; transform: none; } }
+
+    .card-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--blue); color: #fff;
+      font-size: 0.72rem; font-weight: 800; flex-shrink: 0;
+    }
+    .card-header {
+      display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.4rem;
+    }
+    .card-title { font-size: 1rem; font-weight: 800; color: var(--text); }
+    .card-sub { font-size: 0.78rem; color: var(--muted); margin-left: auto; }
+
+    /* FIELDS */
+    .field { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 1rem; }
+    .field:last-child { margin-bottom: 0; }
+    .field label {
+      font-size: 0.72rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .field input, .field textarea, .field select {
+      background: var(--navy-input); border: 1px solid var(--border);
+      border-radius: 12px; padding: 0.78rem 1rem;
+      color: var(--text); font-family: inherit; font-size: 0.9rem;
+      outline: none; width: 100%;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field textarea { resize: vertical; min-height: 110px; line-height: 1.55; }
+    .field input::placeholder, .field textarea::placeholder { color: rgba(132,148,176,0.4); }
+    .field input:focus, .field textarea:focus, .field select:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(30,86,255,0.12);
+    }
+    .field input.error { border-color: rgba(248,113,113,0.5); box-shadow: 0 0 0 3px rgba(248,113,113,0.08); }
+    .field-err { font-size: 0.72rem; color: #f87171; display: none; margin-top: 0.15rem; }
+    .field-err.show { display: block; }
+
+    /* Prefixo R$ */
+    .input-prefix { position: relative; }
+    .input-prefix span {
+      position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+      font-size: 0.9rem; font-weight: 700; color: var(--muted); pointer-events: none;
+    }
+    .input-prefix input { padding-left: 2.4rem; }
+
+    /* CHIPS de tipo / comodidade */
+    .chips-grid { display: flex; flex-wrap: wrap; gap: 0.55rem; }
+    .sel-chip {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 0.45rem 1rem;
+      background: var(--navy-2); border: 1px solid var(--border);
+      border-radius: 50px; font-size: 0.82rem; font-weight: 600;
+      color: var(--muted); cursor: pointer; user-select: none;
+      transition: all .15s;
+    }
+    .sel-chip svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .sel-chip.active {
+      background: rgba(30,86,255,0.15); border-color: var(--blue); color: var(--blue-2);
+    }
+    .sel-chip.single.active {
+      background: rgba(30,86,255,0.18); border-color: var(--blue);
+    }
+    #errTipo { margin-top: 0.4rem; }
+
+    /* UPLOAD DE IMAGEM */
+    .upload-zone {
+      border: 2px dashed var(--border); border-radius: 16px;
+      padding: 2.5rem 1rem; text-align: center; cursor: pointer;
+      transition: border-color .2s, background .2s;
+      position: relative; overflow: hidden;
+    }
+    .upload-zone:hover { border-color: var(--blue); background: rgba(30,86,255,0.04); }
+    .upload-zone.has-image { padding: 0; border-style: solid; }
+    .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .upload-icon { font-size: 2.2rem; margin-bottom: 0.6rem; display: block; }
+    .upload-text { font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+    .upload-hint { font-size: 0.72rem; color: rgba(132,148,176,0.5); margin-top: 0.3rem; }
+    #imgPreview {
+      width: 100%; max-height: 260px; object-fit: cover;
+      border-radius: 14px; display: none;
+    }
+    .upload-zone.has-image #imgPreview { display: block; }
+    .upload-zone.has-image .upload-placeholder { display: none; }
+
+    /* Fotos adicionais */
+    .extra-photos-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;
+    }
+    @media (max-width: 600px) { .extra-photos-grid { grid-template-columns: repeat(2, 1fr); } }
+    .extra-upload-slot {
+      aspect-ratio: 4/3; border-radius: 12px;
+      border: 2px dashed var(--border); background: var(--navy-2);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; transition: border-color .2s, background .2s;
+      position: relative; overflow: hidden; gap: 0.3rem;
+    }
+    .extra-upload-slot:hover { border-color: var(--blue); background: rgba(30,86,255,0.04); }
+    .extra-upload-slot.has-img { border-style: solid; border-color: var(--blue); padding: 0; }
+    .extra-upload-slot.has-img .extra-upload-icon,
+    .extra-upload-slot.has-img .extra-upload-label { display: none; }
+    .extra-upload-icon { font-size: 1.6rem; color: var(--muted); line-height: 1; }
+    .extra-upload-label { font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+    .extra-preview-img { width: 100%; height: 100%; object-fit: cover; display: none; }
+    .extra-upload-slot.has-img .extra-preview-img { display: block; }
+    .extra-remove-btn {
+      position: absolute; top: 0.4rem; right: 0.4rem;
+      background: rgba(0,0,0,0.6); border: none; border-radius: 50%;
+      width: 22px; height: 22px; color: var(--text); font-size: 0.75rem;
+      cursor: pointer; display: none; align-items: center; justify-content: center;
+      line-height: 1;
+    }
+    .extra-upload-slot.has-img .extra-remove-btn { display: flex; }
+
+    /* BOTÃO FINAL */
+    .btn-publish {
+      width: 100%; padding: 1rem;
+      background: var(--blue); color: #fff; border: none;
+      border-radius: 14px; font-family: inherit;
+      font-size: 1rem; font-weight: 800; cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: transform .18s, box-shadow .18s, background .18s;
+      box-shadow: 0 6px 24px rgba(30,86,255,0.4);
+      display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+    }
+    .btn-publish::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .btn-publish:hover { background: #2d64ff; transform: translateY(-2px); box-shadow: 0 10px 32px rgba(30,86,255,0.5); }
+    .btn-publish:active { transform: none; }
+    .btn-publish.loading .lbl { display: none; }
+    .btn-publish.loading::after {
+      content: ''; width: 20px; height: 20px;
+      border: 2.5px solid rgba(255,255,255,0.3); border-top-color: var(--text);
+      border-radius: 50%; animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* TOAST */
+    .toast {
+      position: fixed; top: 1.4rem; left: 50%;
+      transform: translateX(-50%) translateY(-130%);
+      background: #0e2a1a; border: 1px solid rgba(52,211,153,0.3);
+      color: #34d399; padding: 0.85rem 1.6rem; border-radius: 50px;
+      font-size: 0.9rem; font-weight: 600;
+      display: flex; align-items: center; gap: 0.6rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 9999;
+      transition: transform .4s cubic-bezier(0.22,1,0.36,1); white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.85rem; }
+    @media (max-width: 600px) { .form-row-4 { grid-template-columns: 1fr 1fr; } }
+
+    @media (max-width: 640px) {
+      .form-card { padding: 1.6rem 1.3rem; }
+      .form-wrap { padding: 0 1rem 5rem; }
+      .hero { padding: calc(var(--nav-h) + 2.5rem) 1rem 2rem; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+  <link rel="stylesheet" href="tema.css" />
+  <script src="auth.js"></script>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="plataforma.html" class="nav-logo">FUS<span style="color:var(--gold)">HUB</span></a>
+    <a href="plataforma.html" class="nav-back">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/>
+      </svg>
+      Voltar
+    </a>
+  </nav>
+
+  <div class="toast" id="toast">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>
+    Imóvel publicado com sucesso!
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      Anfitrião Fushub
+    </div>
+    <h1>Anuncie seu <span>imóvel</span></h1>
+    <p>Cadastre sua moradia e encontre estudantes interessados na sua região</p>
+  </div>
+
+  <!-- FORMULÁRIO -->
+  <div class="form-wrap" id="formWrap">
+
+    <!-- 1. Informações básicas -->
+    <div class="form-card">
+      <div class="card-header">
+        <span class="card-num">1</span>
+        <span class="card-title">Informações básicas</span>
+      </div>
+      <div class="field">
+        <label for="fTitulo">Título do anúncio</label>
+        <input id="fTitulo" type="text" placeholder='Ex: "Quarto individual perto da UFPE"' maxlength="80" />
+        <span class="field-err" id="err-titulo">Dê um título para seu imóvel</span>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label for="fCidade">Cidade</label>
+          <input id="fCidade" type="text" placeholder="São Paulo" />
+          <span class="field-err" id="err-cidade">Informe a cidade</span>
+        </div>
+        <div class="field">
+          <label for="fBairro">Bairro / Referência</label>
+          <input id="fBairro" type="text" placeholder='Ex: "Perto da USP"' />
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Tipo de acomodação -->
+    <div class="form-card">
+      <div class="card-header">
+        <span class="card-num">2</span>
+        <span class="card-title">Tipo de acomodação</span>
+        <span class="card-sub">Selecione um</span>
+      </div>
+      <div class="chips-grid" id="tipoChips">
+        <span class="sel-chip single" data-val="quarto" onclick="selectTipo(this)">🛏️ Quarto individual</span>
+        <span class="sel-chip single" data-val="compartilhado" onclick="selectTipo(this)">👥 Quarto compartilhado</span>
+        <span class="sel-chip single" data-val="kitnet" onclick="selectTipo(this)">🏠 Kitnet</span>
+        <span class="sel-chip single" data-val="republica" onclick="selectTipo(this)">🏡 República</span>
+        <span class="sel-chip single" data-val="apartamento" onclick="selectTipo(this)">🏢 Apartamento</span>
+        <span class="sel-chip single" data-val="casa" onclick="selectTipo(this)">🏘️ Casa</span>
+      </div>
+      <span class="field-err" id="err-tipo">Selecione o tipo de acomodação</span>
+    </div>
+
+    <!-- 3. Detalhes -->
+    <div class="form-card">
+      <div class="card-header">
+        <span class="card-num">3</span>
+        <span class="card-title">Detalhes</span>
+      </div>
+      <div class="form-row-4">
+        <div class="field">
+          <label for="fQuartos">Quartos</label>
+          <select id="fQuartos">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4+</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="fBanheiros">Banheiros</label>
+          <select id="fBanheiros">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3+</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="fVagas">Vagas disponíveis</label>
+          <input id="fVagas" type="number" min="1" max="20" placeholder="1" value="1" />
+        </div>
+        <div class="field">
+          <label for="fMoradores">Moradores atuais</label>
+          <input id="fMoradores" type="number" min="0" max="20" placeholder="0" value="0" />
+        </div>
+      </div>
+      <div class="field" style="margin-top:0.75rem">
+        <label for="fStatus">Status</label>
+        <select id="fStatus">
+          <option value="disponivel">Disponível agora</option>
+          <option value="brevemente">Disponível em breve</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 3b. Endereço completo -->
+    <div class="form-card">
+      <div class="card-header">
+        <span class="card-num">3b</span>
+        <span class="card-title">Endereço</span>
+        <span class="card-sub">Visível apenas no detalhe do imóvel</span>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label for="fRua">Rua / Logradouro</label>
+          <input id="fRua" type="text" placeholder="Rua das Flores, 123" />
+        </div>
+        <div class="field">
+          <label for="fEstado">Estado (UF)</label>
+          <select id="fEstado">
+            <option value="">Selecione</option>
+            <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+            <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+            <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+            <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+            <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+            <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+            <option selected>SP</option><option>SE</option><option>TO</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Preço -->
+    <div class="form-card">
+      <div class="card-header">
+        <span class="card-num">4</span>
+        <span class="card-title">Preço mensal</span>
+      </div>
+      <div class="field">
+        <label for="fPreco">Valor por mês (R$)</label>
+        <div class="input-prefix">
+          <span>R$</span>
+          <input id="fPreco" type="number" min="0" placeholder="850" />
+        </div>
+        <span class="field-err" id="err-preco">Informe um valor válido</span>
+      </div>
+    </div>
+
+    <!-- 4. Comodidades -->
+    <div class="form-card">
+      <div class="card-header">
+        <span class="card-num">5</span>
+        <span class="card-title">Comodidades</span>
+        <span class="card-sub">Pode selecionar várias</span>
+      </div>
+      <div class="chips-grid" id="comodChips">
+        <span class="sel-chip" data-val="Wi-Fi" onclick="this.classList.toggle('active')">📶 Wi-Fi</span>
+        <span class="sel-chip" data-val="Mobiliado" onclick="this.classList.toggle('active')">🛋️ Mobiliado</span>
+        <span class="sel-chip" data-val="Lavanderia" onclick="this.classList.toggle('active')">🧺 Lavanderia</span>
+        <span class="sel-chip" data-val="Garagem" onclick="this.classList.toggle('active')">🚗 Garagem</span>
+        <span class="sel-chip" data-val="Pet friendly" onclick="this.classList.toggle('active')">🐾 Pet friendly</span>
+        <span class="sel-chip" data-val="Academia" onclick="this.classList.toggle('active')">🏋️ Academia</span>
+        <span class="sel-chip" data-val="Segurança 24h" onclick="this.classList.toggle('active')">🔒 Segurança 24h</span>
+      </div>
+    </div>
+
+    <!-- 5. Descrição -->
+    <div class="form-card">
+      <div class="card-header">
+        <span class="card-num">6</span>
+        <span class="card-title">Descrição do imóvel</span>
+      </div>
+      <div class="field">
+        <label for="fDesc">Descreva o imóvel</label>
+        <textarea id="fDesc" placeholder="Fale sobre o imóvel: tamanho, localização, proximidade de universidades, regras da casa, o que está incluso no aluguel..." maxlength="800"></textarea>
+        <span class="field-err" id="err-desc">Adicione uma descrição</span>
+      </div>
+    </div>
+
+        <!-- 7. Foto de capa (obrigatória) -->
+    <div class="form-card">
+      <div class="card-header">
+        <span class="card-num">7</span>
+        <span class="card-title">Foto de capa</span>
+        <span class="card-sub" style="color:#f87171">Obrigatória</span>
+      </div>
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem">Esta é a foto principal que aparece nos cards da plataforma. Escolha uma imagem que represente bem o imóvel.</p>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" accept="image/*" id="imgInput" onchange="handleImg(this)" />
+        <div class="upload-placeholder">
+          <span class="upload-icon">📷</span>
+          <div class="upload-text">Clique ou arraste a foto de capa aqui</div>
+          <div class="upload-hint">JPG, PNG ou WEBP · Máx 5MB</div>
+        </div>
+        <img id="imgPreview" alt="Preview" />
+      </div>
+      <span class="field-err" id="err-foto">Adicione uma foto de capa para o imóvel</span>
+    </div>
+
+    <!-- 7b. Fotos adicionais (até 4) -->
+    <div class="form-card">
+      <div class="card-header">
+        <span class="card-num">7b</span>
+        <span class="card-title">Fotos adicionais</span>
+        <span class="card-sub" style="color:#f87171">Obrigatória · 4 fotos</span>
+      </div>
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem">Fotos extras que aparecem na página de detalhes do imóvel. Quanto mais fotos, mais confiança para o inquilino.</p>
+      <div class="extra-photos-grid" id="extraPhotosGrid">
+        <div class="extra-upload-slot" id="slot-0" onclick="document.getElementById('extraInput-0').click()">
+          <input type="file" id="extraInput-0" accept="image/*" style="display:none" onchange="handleExtraImg(this,0)" />
+          <span class="extra-upload-icon">+</span>
+          <span class="extra-upload-label">Foto 2</span>
+        </div>
+        <div class="extra-upload-slot" id="slot-1" onclick="document.getElementById('extraInput-1').click()">
+          <input type="file" id="extraInput-1" accept="image/*" style="display:none" onchange="handleExtraImg(this,1)" />
+          <span class="extra-upload-icon">+</span>
+          <span class="extra-upload-label">Foto 3</span>
+        </div>
+        <div class="extra-upload-slot" id="slot-2" onclick="document.getElementById('extraInput-2').click()">
+          <input type="file" id="extraInput-2" accept="image/*" style="display:none" onchange="handleExtraImg(this,2)" />
+          <span class="extra-upload-icon">+</span>
+          <span class="extra-upload-label">Foto 4</span>
+        </div>
+        <div class="extra-upload-slot" id="slot-3" onclick="document.getElementById('extraInput-3').click()">
+          <input type="file" id="extraInput-3" accept="image/*" style="display:none" onchange="handleExtraImg(this,3)" />
+          <span class="extra-upload-icon">+</span>
+          <span class="extra-upload-label">Foto 5</span>
+        </div>
+      </div>
+      <span class="field-err" id="err-fotos-extras">Adicione as 4 fotos adicionais do imóvel</span>
+    </div>
+
+    <!-- BOTÃO -->
+    <button class="btn-publish" id="btnPublish" onclick="publicar()">
+      <span class="lbl">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:.3rem"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+        Publicar anúncio
+      </span>
+    </button>
+
+  </div><!-- /form-wrap -->
+
+  <script>
+    // ── Seleção de tipo (single select) ──
+    function selectTipo(el) {
+      document.querySelectorAll('#tipoChips .sel-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('err-tipo').classList.remove('show');
+    }
+
+    // ── Upload de imagem ──
+    function handleImg(input) {
+      if (!input.files || !input.files[0]) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('imgPreview').src = e.target.result;
+        document.getElementById('uploadZone').classList.add('has-image');
+        // Remove erro de foto obrigatória se existir
+        document.getElementById('err-foto').classList.remove('show');
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+
+    // ── Fotos adicionais ──
+    const extraPhotosData = [null, null, null, null]; // até 4 fotos extras
+
+    function handleExtraImg(input, idx) {
+      if (!input.files || !input.files[0]) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const dataUrl = e.target.result;
+        const sizeKB = Math.round(dataUrl.length * 0.75 / 1024);
+        if (sizeKB > 1024) {
+          alert(`Foto ${idx+2} muito grande (${sizeKB}KB). Use imagens menores que 1MB.`);
+          return;
+        }
+        extraPhotosData[idx] = dataUrl;
+        const slot = document.getElementById('slot-' + idx);
+        slot.classList.add('has-img');
+        // Cria ou atualiza img de preview
+        let img = slot.querySelector('.extra-preview-img');
+        if (!img) {
+          img = document.createElement('img');
+          img.className = 'extra-preview-img';
+          slot.appendChild(img);
+        }
+        img.src = dataUrl;
+        // Botão de remover
+        let rmBtn = slot.querySelector('.extra-remove-btn');
+        if (!rmBtn) {
+          rmBtn = document.createElement('button');
+          rmBtn.className = 'extra-remove-btn';
+          rmBtn.textContent = '✕';
+          rmBtn.type = 'button';
+          rmBtn.onclick = (ev) => { ev.stopPropagation(); removerExtraImg(idx); };
+          slot.appendChild(rmBtn);
+        }
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+
+    function removerExtraImg(idx) {
+      extraPhotosData[idx] = null;
+      const slot = document.getElementById('slot-' + idx);
+      slot.classList.remove('has-img');
+      const img = slot.querySelector('.extra-preview-img');
+      if (img) img.src = '';
+      document.getElementById('extraInput-' + idx).value = '';
+    }
+
+    // ── Drag & drop ──
+    const zone = document.getElementById('uploadZone');
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--blue)'; });
+    zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); zone.style.borderColor = '';
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          document.getElementById('imgPreview').src = ev.target.result;
+          zone.classList.add('has-image');
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // ── Publicar ──
+    function publicar() {
+      const titulo  = document.getElementById('fTitulo').value.trim();
+      const cidade  = document.getElementById('fCidade').value.trim();
+      const bairro  = document.getElementById('fBairro').value.trim();
+      const tipoEl  = document.querySelector('#tipoChips .sel-chip.active');
+      const preco   = parseFloat(document.getElementById('fPreco').value);
+      const desc    = document.getElementById('fDesc').value.trim();
+
+      let valid = true;
+
+      const setErr = (id, show) => {
+        document.getElementById(id).classList.toggle('show', show);
+        if (id !== 'err-tipo') {
+          const input = document.getElementById(id.replace('err-','f').replace('titulo','Titulo').replace('cidade','Cidade').replace('preco','Preco').replace('desc','Desc'));
+          if (input) input.classList.toggle('error', show);
+        }
+      };
+
+      if (!titulo)        { setErr('err-titulo', true); valid = false; } else setErr('err-titulo', false);
+      if (!cidade)        { setErr('err-cidade', true); valid = false; } else setErr('err-cidade', false);
+      if (!tipoEl)        { setErr('err-tipo',   true); valid = false; } else setErr('err-tipo',   false);
+      if (!preco || preco <= 0) { setErr('err-preco', true); valid = false; } else setErr('err-preco', false);
+      if (!desc)          { setErr('err-desc',   true); valid = false; } else setErr('err-desc',   false);
+
+      // Valida foto de capa obrigatória
+      const imgSrcCheck = document.getElementById('imgPreview').src || '';
+      if (!imgSrcCheck || !imgSrcCheck.startsWith('data:')) {
+        document.getElementById('err-foto').classList.add('show');
+        valid = false;
+      } else {
+        document.getElementById('err-foto').classList.remove('show');
+      }
+
+      // Valida 4 fotos adicionais obrigatórias
+      const extrasPreenchidas = extraPhotosData.filter(Boolean).length;
+      const errExtras = document.getElementById('err-fotos-extras');
+      if (extrasPreenchidas < 4) {
+        errExtras.classList.add('show');
+        valid = false;
+      } else {
+        errExtras.classList.remove('show');
+      }
+
+      if (!valid) {
+        document.querySelector('.field-err.show')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const btn = document.getElementById('btnPublish');
+      btn.classList.add('loading'); btn.disabled = true;
+
+      // Monta o objeto do imóvel
+      const comodidades = [...document.querySelectorAll('#comodChips .sel-chip.active')].map(c => c.dataset.val);
+      const imgSrc = document.getElementById('imgPreview').src || null;
+
+      // Limita imagens base64: aceita só se < 200KB para não encher o localStorage
+      let imgCustom = null;
+      if (imgSrc && imgSrc.startsWith('data:')) {
+        imgCustom = imgSrc;
+      }
+
+      const imovel = {
+        id: Date.now(),
+        titulo,
+        loc: bairro ? `${bairro}, ${cidade}` : cidade,
+        cidade,
+        bairro,
+        rua:       document.getElementById('fRua').value.trim(),
+        estado:    document.getElementById('fEstado').value,
+        tipo: tipoEl.dataset.val,
+        preco: Math.round(preco),
+        quartos:   parseInt(document.getElementById('fQuartos').value) || 1,
+        banheiros: parseInt(document.getElementById('fBanheiros').value) || 1,
+        vagas:     parseInt(document.getElementById('fVagas').value) || 1,
+        moradores: parseInt(document.getElementById('fMoradores').value) || 0,
+        status:    document.getElementById('fStatus').value,
+        comodidades,
+        descricao: desc,
+        stars: 0,
+        reviews: 0,
+        avaliacoes: [],
+        emoji: getEmoji(tipoEl.dataset.val),
+        img: imgClassPorTipo(tipoEl.dataset.val),
+        badge: 'Novo',
+        imgCustom,
+        fotosExtras: extraPhotosData.filter(Boolean),
+        criadoEm: new Date().toISOString(),
+      };
+
+      // Salva via FushubAuth (isolado por usuário)
+      FushubAuth.salvarImovel(imovel);
+      // Dispara notificação de novo imóvel para usuários interessados
+      if (window.FushubNotif) FushubNotif.novoImovel(imovel);
+
+      setTimeout(() => {
+        btn.classList.remove('loading'); btn.disabled = false;
+        document.getElementById('toast').classList.add('show');
+        setTimeout(() => {
+          document.getElementById('toast').classList.remove('show');
+          window.location.href = 'painel.html';
+        }, 2000);
+      }, 1200);
+    }
+
+    function getEmoji(tipo) {
+      const map = { quarto:'🛏️', compartilhado:'🛏️', kitnet:'🏠', republica:'🏡', apartamento:'🏢', casa:'🏘️' };
+      return map[tipo] || '🏠';
+    }
+
+    function imgClassPorTipo(tipo) {
+      const map = { quarto:'img-2', compartilhado:'img-5', kitnet:'img-1', republica:'img-3', apartamento:'img-4', casa:'img-6' };
+      return map[tipo] || 'img-7';
+    }
+
+    function logout() { FushubAuth.logout(); }
+  </script>
+</body>
+</html>

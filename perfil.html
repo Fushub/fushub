@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meu Perfil — Fushub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:       #1e56ff;
+      --blue-2:     #3b73ff;
+      --gold:       #f0a500;
+      --navy:       #f5f7fc;
+      --navy-2:     #eef1f8;
+      --navy-card:  #ffffff;
+      --navy-input: #f0f3fa;
+      --border:     rgba(0,0,0,0.08);
+      --border-focus: rgba(30,86,255,0.45);
+      --muted:      #6b7fa3;
+      --text:       #1a2540;
+      --nav-h:      74px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--navy);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: var(--nav-h);
+      background: var(--navy-2); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 2rem; gap: 1rem;
+    }
+    .nav-logo {
+      font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em;
+      color: var(--text); text-decoration: none; flex-shrink: 0;
+    }
+    .nav-logo span { color: var(--gold); }
+    .nav-back {
+      display: flex; align-items: center; gap: 0.5rem;
+      color: var(--muted); text-decoration: none;
+      font-size: 0.85rem; font-weight: 600;
+      padding: 0.4rem 0.8rem; border-radius: 50px;
+      border: 1px solid var(--border); background: var(--navy-card);
+      transition: color .2s, border-color .2s;
+      margin-left: auto;
+    }
+    .nav-back:hover { color: var(--text); border-color: rgba(255,255,255,0.18); }
+    .nav-back svg { transition: transform .2s; }
+    .nav-back:hover svg { transform: translateX(-2px); }
+
+    /* ── Fundo com grade ── */
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: radial-gradient(rgba(30,86,255,0.07) 1px, transparent 1px);
+      background-size: 28px 28px; pointer-events: none; z-index: 0;
+    }
+
+    /* ── Layout principal ── */
+    .page {
+      position: relative; z-index: 1;
+      padding-top: calc(var(--nav-h) + 2.5rem);
+      padding-bottom: 4rem;
+      max-width: 900px; margin: 0 auto;
+      padding-left: 2rem; padding-right: 2rem;
+      opacity: 0; animation: fadeUp .5s cubic-bezier(0.22,1,0.36,1) .1s forwards;
+    }
+    @keyframes fadeUp { to { opacity: 1; transform: none; } }
+
+    /* ── Cabeçalho da seção ── */
+    .page-header { margin-bottom: 2.5rem; }
+    .page-header h1 {
+      font-size: 1.7rem; font-weight: 800; color: var(--text);
+      letter-spacing: -0.02em; margin-bottom: 0.3rem;
+    }
+    .page-header p { font-size: 0.88rem; color: var(--muted); }
+
+    /* ── Layout em duas colunas ── */
+    .two-col {
+      display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* ── Card de preview (coluna esquerda) ── */
+    .preview-card {
+      background: var(--navy-card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 2rem 1.5rem;
+      text-align: center; position: sticky; top: calc(var(--nav-h) + 1.5rem);
+    }
+    .preview-card .preview-label {
+      font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--muted); margin-bottom: 1.2rem;
+    }
+    .avatar-wrap { position: relative; display: inline-block; margin-bottom: 1.2rem; }
+    .avatar-circle {
+      width: 88px; height: 88px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue) 0%, #6b3cff 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: 800; color: #fff;
+      border: 3px solid rgba(30,86,255,0.3);
+      overflow: hidden;
+    }
+    .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-edit-btn {
+      position: absolute; bottom: 2px; right: 2px;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--blue); border: 2px solid var(--navy-card);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background .2s;
+    }
+    .avatar-edit-btn:hover { background: #2d64ff; }
+    .avatar-edit-btn svg { width: 11px; height: 11px; stroke: #fff; }
+    #avatarInput { display: none; }
+
+    .preview-name {
+      font-size: 1.1rem; font-weight: 800; color: var(--text);
+      margin-bottom: 0.2rem; min-height: 1.4em;
+    }
+    .preview-course {
+      font-size: 0.78rem; color: var(--blue-2); font-weight: 600;
+      margin-bottom: 0.6rem; min-height: 1.2em;
+    }
+    .preview-bio {
+      font-size: 0.8rem; color: var(--muted); line-height: 1.5;
+      min-height: 2em; word-break: break-word;
+    }
+    .preview-divider { height: 1px; background: var(--border); margin: 1rem 0; }
+    .preview-tags {
+      display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center;
+    }
+    .preview-tag {
+      font-size: 0.68rem; font-weight: 600;
+      background: rgba(30,86,255,0.1); color: var(--blue-2);
+      border: 1px solid rgba(30,86,255,0.2);
+      padding: 0.2rem 0.6rem; border-radius: 4px;
+    }
+    .preview-tag.empty { opacity: 0.3; }
+    .preview-stats {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;
+      margin-top: 1rem;
+    }
+    .stat-box {
+      background: var(--navy-2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 0.6rem 0.5rem;
+      text-align: center;
+    }
+    .stat-val { font-size: 1.1rem; font-weight: 800; color: var(--text); }
+    .stat-lbl { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* ── Card de formulário ── */
+    .form-card {
+      background: var(--navy-card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 2rem;
+    }
+    .section-title {
+      font-size: 0.72rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      margin-bottom: 1.2rem; padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-gap { margin-bottom: 2rem; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .field { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 1rem; }
+    .field label {
+      font-size: 0.75rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .field label .opt {
+      font-weight: 400; color: rgba(132,148,176,0.5);
+      text-transform: none; letter-spacing: 0; font-size: 0.7rem; margin-left: 0.3rem;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      background: var(--navy-input); border: 1px solid var(--border);
+      border-radius: 10px; padding: 0.72rem 0.95rem;
+      color: var(--text); font-family: inherit; font-size: 0.9rem;
+      outline: none; width: 100%;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field textarea {
+      resize: vertical; min-height: 90px; line-height: 1.5;
+    }
+    .field input::placeholder,
+    .field textarea::placeholder { color: rgba(132,148,176,0.4); }
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(30,86,255,0.12);
+    }
+    .field select { cursor: pointer; appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238494b0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6,9 12,15 18,9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 0.9rem center;
+      padding-right: 2.2rem;
+    }
+    .field select option { background: var(--navy-card); }
+
+    /* Chips de interesses */
+    .chips-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .interest-chip {
+      padding: 0.38rem 0.85rem;
+      background: var(--navy-2); border: 1px solid var(--border);
+      border-radius: 50px; font-size: 0.78rem; font-weight: 600;
+      color: var(--muted); cursor: pointer; user-select: none;
+      transition: all .15s;
+    }
+    .interest-chip.active {
+      background: rgba(30,86,255,0.15); border-color: var(--blue);
+      color: var(--blue-2);
+    }
+
+    /* Input de foto read-only */
+    .field-email-note {
+      font-size: 0.72rem; color: var(--muted);
+      margin-top: 0.25rem; display: block;
+    }
+
+    /* Botões de ação */
+    .actions {
+      display: flex; gap: 0.75rem; margin-top: 0.5rem; justify-content: flex-end;
+    }
+    .btn-cancel {
+      padding: 0.75rem 1.4rem;
+      background: none; border: 1px solid var(--border);
+      border-radius: 12px; color: var(--muted);
+      font-family: inherit; font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; transition: all .2s;
+    }
+    .btn-cancel:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+    .btn-save {
+      padding: 0.75rem 1.8rem;
+      background: var(--blue); border: none;
+      border-radius: 12px; color: #fff;
+      font-family: inherit; font-size: 0.9rem; font-weight: 700;
+      cursor: pointer; position: relative; overflow: hidden;
+      transition: background .2s, transform .18s, box-shadow .18s;
+      box-shadow: 0 4px 16px rgba(30,86,255,0.35);
+    }
+    .btn-save::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .btn-save:hover { background: #2d64ff; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(30,86,255,0.45); }
+    .btn-save.loading .btn-lbl { display: none; }
+    .btn-save.loading::after {
+      content: ''; display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3); border-top-color: var(--text);
+      border-radius: 50%; animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Toast */
+    .toast {
+      position: fixed; top: 1.4rem; left: 50%;
+      transform: translateX(-50%) translateY(-120%);
+      background: #0e2a1a; border: 1px solid rgba(52,211,153,0.3);
+      color: #34d399; padding: 0.8rem 1.4rem; border-radius: 50px;
+      font-size: 0.88rem; font-weight: 600;
+      display: flex; align-items: center; gap: 0.55rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 9999;
+      transition: transform .4s cubic-bezier(0.22,1,0.36,1); white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 768px) {
+      .two-col { grid-template-columns: 1fr; }
+      .preview-card { position: static; }
+      .form-row { grid-template-columns: 1fr; }
+      .page { padding-left: 1rem; padding-right: 1rem; }
+    }
+  </style>
+  <link rel="stylesheet" href="tema.css" />
+  <script src="auth.js"></script>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="plataforma.html" class="nav-logo">FUS<span style="color:var(--gold)">HUB</span></a>
+    <a href="plataforma.html" class="nav-back">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/>
+      </svg>
+      Voltar
+    </a>
+  </nav>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20,6 9,17 4,12"/>
+    </svg>
+    Perfil atualizado com sucesso!
+  </div>
+
+  <div class="page">
+    <div class="page-header">
+      <h1>Meu Perfil</h1>
+      <p>Personalize como outros estudantes vão te encontrar no Fushub</p>
+    </div>
+
+    <div class="two-col">
+
+      <!-- ── Preview (coluna esquerda) ── -->
+      <div class="preview-card">
+        <div class="preview-label">👁 Visualização pública</div>
+
+        <div class="avatar-wrap">
+          <div class="avatar-circle" id="avatarCircle">
+            <span id="avatarInitials">?</span>
+          </div>
+          <label class="avatar-edit-btn" for="avatarInput" title="Trocar foto">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+          </label>
+          <input type="file" id="avatarInput" accept="image/*" onchange="handleAvatar(this)" />
+        </div>
+
+        <div class="preview-name" id="prevName">—</div>
+        <div class="preview-course" id="prevCourse">—</div>
+        <div class="preview-bio" id="prevBio">Sem bio ainda...</div>
+
+        <div class="preview-divider"></div>
+
+        <div class="preview-tags" id="prevTags">
+          <span class="preview-tag empty">Nenhum interesse selecionado</span>
+        </div>
+
+        <div class="preview-stats">
+          <div class="stat-box">
+            <div class="stat-val" id="statCidade">—</div>
+            <div class="stat-lbl">Cidade</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="statFaculdade">—</div>
+            <div class="stat-lbl">Faculdade</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Formulário (coluna direita) ── -->
+      <div class="form-card">
+
+        <!-- Seção: Dados pessoais -->
+        <div class="section-gap">
+          <div class="section-title">Dados pessoais</div>
+
+          <div class="form-row">
+            <div class="field">
+              <label for="fNome">Nome</label>
+              <input id="fNome" type="text" placeholder="João" />
+            </div>
+            <div class="field">
+              <label for="fSobrenome">Sobrenome</label>
+              <input id="fSobrenome" type="text" placeholder="Silva" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="fEmail">E-mail <span class="opt">— não editável</span></label>
+            <input id="fEmail" type="email" readonly style="opacity:.55;cursor:default" />
+            <span class="field-email-note">O e-mail não pode ser alterado após o cadastro.</span>
+          </div>
+
+          <div class="field">
+            <label for="fTelefone">Telefone</label>
+            <input id="fTelefone" type="tel" placeholder="(11) 99999-9999" />
+          </div>
+        </div>
+
+        <!-- Seção: Perfil público -->
+        <div class="section-gap">
+          <div class="section-title">Perfil público</div>
+
+          <div class="field">
+            <label for="fBio">Bio <span class="opt">— aparece no seu perfil</span></label>
+            <textarea id="fBio" placeholder="Fale um pouco sobre você: curso, cidade, estilo de vida..." maxlength="200"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <label for="fCidade">Cidade</label>
+              <input id="fCidade" type="text" placeholder="São Paulo" />
+            </div>
+            <div class="field">
+              <label for="fFaculdade">Faculdade</label>
+              <input id="fFaculdade" type="text" placeholder="USP, UNICAMP…" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <label for="fCurso">Curso</label>
+              <input id="fCurso" type="text" placeholder="Engenharia, Direito…" />
+            </div>
+            <div class="field">
+              <label for="fPeriodo">Período</label>
+              <select id="fPeriodo">
+                <option value="">Selecione</option>
+                <option>1º semestre</option>
+                <option>2º semestre</option>
+                <option>3º semestre</option>
+                <option>4º semestre</option>
+                <option>5º semestre</option>
+                <option>6º semestre</option>
+                <option>7º semestre</option>
+                <option>8º semestre</option>
+                <option>Pós-graduação</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção: Interesses -->
+        <div class="section-gap">
+          <div class="section-title">Interesses e estilo de vida</div>
+          <div class="chips-grid" id="interestChips">
+            <span class="interest-chip" onclick="toggleChip(this)">🎮 Jogos</span>
+            <span class="interest-chip" onclick="toggleChip(this)">📚 Estudos</span>
+            <span class="interest-chip" onclick="toggleChip(this)">🏋️ Academia</span>
+            <span class="interest-chip" onclick="toggleChip(this)">🎵 Música</span>
+            <span class="interest-chip" onclick="toggleChip(this)">🍕 Gastronomia</span>
+            <span class="interest-chip" onclick="toggleChip(this)">🐾 Pet</span>
+            <span class="interest-chip" onclick="toggleChip(this)">🚗 Carro</span>
+            <span class="interest-chip" onclick="toggleChip(this)">🎨 Arte</span>
+            <span class="interest-chip" onclick="toggleChip(this)">🌿 Natureza</span>
+            <span class="interest-chip" onclick="toggleChip(this)">📸 Fotografia</span>
+            <span class="interest-chip" onclick="toggleChip(this)">✈️ Viagens</span>
+            <span class="interest-chip" onclick="toggleChip(this)">📺 Séries</span>
+          </div>
+        </div>
+
+
+
+        <!-- Ações -->
+        <div class="actions">
+          <button class="btn-cancel" onclick="resetForm()">Cancelar</button>
+          <button class="btn-save" id="btnSave" onclick="salvarPerfil()">
+            <span class="btn-lbl">Salvar alterações</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Carrega dados do cadastro + perfil salvo ──
+    function loadData() {
+      const merged = FushubAuth.getUser() || {};
+
+      // Campos do form
+      document.getElementById('fNome').value      = merged.nome      || '';
+      document.getElementById('fSobrenome').value = merged.sobrenome || '';
+      document.getElementById('fEmail').value     = merged.email     || '';
+      document.getElementById('fTelefone').value  = merged.telefone  || '';
+      document.getElementById('fBio').value       = merged.bio       || '';
+      document.getElementById('fCidade').value    = merged.cidade    || '';
+      document.getElementById('fFaculdade').value = merged.faculdade || '';
+      document.getElementById('fCurso').value     = merged.curso     || '';
+      document.getElementById('fPeriodo').value   = merged.periodo   || '';
+
+      // Interesses
+      if (merged.interesses && merged.interesses.length) {
+        document.querySelectorAll('.interest-chip').forEach(chip => {
+          if (merged.interesses.includes(chip.textContent.trim())) chip.classList.add('active');
+        });
+      }
+
+      // Toggles
+      // perfil sempre público — opções de visibilidade removidas
+
+      // Avatar
+      if (merged.avatarUrl) {
+        const img = document.createElement('img');
+        img.src = merged.avatarUrl;
+        const circle = document.getElementById('avatarCircle');
+        circle.innerHTML = '';
+        circle.appendChild(img);
+      }
+
+      atualizarPreview();
+    }
+
+    // ── Preview ao vivo ──
+    function atualizarPreview() {
+      const nome      = document.getElementById('fNome').value.trim();
+      const sobrenome = document.getElementById('fSobrenome').value.trim();
+      const curso     = document.getElementById('fCurso').value.trim();
+      const faculdade = document.getElementById('fFaculdade').value.trim();
+      const cidade    = document.getElementById('fCidade').value.trim();
+      const bio       = document.getElementById('fBio').value.trim();
+
+      const fullName = [nome, sobrenome].filter(Boolean).join(' ');
+      document.getElementById('prevName').textContent = fullName || '—';
+
+      const initials = [(nome[0]||''), (sobrenome[0]||'')].join('').toUpperCase() || '?';
+      const initialsEl = document.getElementById('avatarInitials');
+      if (initialsEl) initialsEl.textContent = initials;
+
+      document.getElementById('prevCourse').textContent =
+        [curso, faculdade].filter(Boolean).join(' · ') || '—';
+
+      document.getElementById('prevBio').textContent = bio || 'Sem bio ainda...';
+      document.getElementById('statCidade').textContent = cidade ? cidade.split(',')[0] : '—';
+      document.getElementById('statFaculdade').textContent = faculdade || '—';
+
+      // Tags de interesses
+      const ativos = [...document.querySelectorAll('.interest-chip.active')].map(c => c.textContent.trim());
+      const tagsEl = document.getElementById('prevTags');
+      if (ativos.length) {
+        tagsEl.innerHTML = ativos.slice(0, 5).map(t => `<span class="preview-tag">${t}</span>`).join('');
+        if (ativos.length > 5) tagsEl.innerHTML += `<span class="preview-tag">+${ativos.length - 5}</span>`;
+      } else {
+        tagsEl.innerHTML = '<span class="preview-tag empty">Nenhum interesse selecionado</span>';
+      }
+    }
+
+    // ── Toggle chips de interesse ──
+    function toggleChip(el) {
+      el.classList.toggle('active');
+      atualizarPreview();
+    }
+
+    // ── Upload de avatar ──
+    // ── Perfil público (acessível por outros usuários via email) ──────────
+    function chavePerfilPublico(email) {
+      return 'fushub_perfil_publico_' + (email || '').toLowerCase().trim();
+    }
+
+    function salvarPerfilPublico(perfil) {
+      if (!perfil.email) return;
+      var pub = {
+        nome:        perfil.nome       || '',
+        sobrenome:   perfil.sobrenome  || '',
+        bio:         perfil.bio        || '',
+        cidade:      perfil.cidade     || '',
+        faculdade:   perfil.faculdade  || '',
+        curso:       perfil.curso      || '',
+        periodo:     perfil.periodo    || '',
+        interesses:  perfil.interesses || [],
+        avatarUrl:   perfil.avatarUrl  || null,
+        atualizadoEm: new Date().toISOString(),
+      };
+      localStorage.setItem(chavePerfilPublico(perfil.email), JSON.stringify(pub));
+    }
+
+    function handleAvatar(input) {
+      if (!input.files || !input.files[0]) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const circle = document.getElementById('avatarCircle');
+        const initialsEl = document.getElementById('avatarInitials');
+        if (initialsEl) initialsEl.remove();
+        let img = circle.querySelector('img');
+        if (!img) {
+          img = document.createElement('img');
+          circle.appendChild(img);
+        }
+        img.src = e.target.result;
+        // salva temporariamente
+        const perfil = JSON.parse(localStorage.getItem(FushubAuth.KEYS.perfil) || '{}');
+        perfil.avatarUrl = e.target.result;
+        localStorage.setItem(FushubAuth.KEYS.perfil, JSON.stringify(perfil));
+        salvarPerfilPublico(perfil);
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+
+    // ── Salvar ──
+    function salvarPerfil() {
+      const btn = document.getElementById('btnSave');
+      btn.classList.add('loading'); btn.disabled = true;
+
+      const interesses = [...document.querySelectorAll('.interest-chip.active')].map(c => c.textContent.trim());
+      const perfil = {
+        nome:       document.getElementById('fNome').value.trim(),
+        sobrenome:  document.getElementById('fSobrenome').value.trim(),
+        telefone:   document.getElementById('fTelefone').value.trim(),
+        bio:        document.getElementById('fBio').value.trim(),
+        cidade:     document.getElementById('fCidade').value.trim(),
+        faculdade:  document.getElementById('fFaculdade').value.trim(),
+        curso:      document.getElementById('fCurso').value.trim(),
+        periodo:    document.getElementById('fPeriodo').value,
+        interesses,
+        togPublico:  true,
+        togTelefone: true,
+      };
+
+      // preserva avatar e email
+      const user = FushubAuth.getUser() || {};
+      perfil.avatarUrl = user.avatarUrl || null;
+      perfil.email     = user.email || '';
+
+      setTimeout(() => {
+        localStorage.setItem(FushubAuth.KEYS.perfil, JSON.stringify(perfil));
+        salvarPerfilPublico(perfil);
+        btn.classList.remove('loading'); btn.disabled = false;
+        showToast();
+      }, 900);
+    }
+
+    // ── Cancelar ──
+    function resetForm() { loadData(); }
+
+    // ── Toast ──
+    function showToast() {
+      const t = document.getElementById('toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // ── Listeners de preview ao vivo ──
+    ['fNome','fSobrenome','fBio','fCidade','fFaculdade','fCurso','fPeriodo'].forEach(id => {
+      document.getElementById(id).addEventListener('input', atualizarPreview);
+    });
+
+    // Máscara de telefone
+    document.getElementById('fTelefone').addEventListener('input', function() {
+      let v = this.value.replace(/\D/g,'').slice(0,11);
+      if (v.length > 6) v = '('+v.slice(0,2)+') '+v.slice(2,7)+'-'+v.slice(7);
+      else if (v.length > 2) v = '('+v.slice(0,2)+') '+v.slice(2);
+      else if (v.length) v = '('+v;
+      this.value = v;
+    });
+
+    // Init
+    loadData();
+
+    function logout() { FushubAuth.logout(); }
+  </script>
+</body>
+</html>

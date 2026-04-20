@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Imóvel — Fushub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:       #1e56ff;
+      --blue-2:     #3b73ff;
+      --gold:       #f0a500;
+      --navy:       #f5f7fc;
+      --navy-2:     #eef1f8;
+      --navy-card:  #ffffff;
+      --navy-input: #f0f3fa;
+      --border:     rgba(0,0,0,0.08);
+      --muted:      #6b7fa3;
+      --text:       #1a2540;
+      --green:      #22c55e;
+      --red:        #f87171;
+      --nav-h:      70px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--navy); color: var(--text);
+      -webkit-font-smoothing: antialiased; min-height: 100vh;
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: var(--nav-h); background: var(--navy-2);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 2rem; gap: 1rem;
+    }
+    .nav-logo { font-size: 1.3rem; font-weight: 800; color: var(--text); text-decoration: none; }
+    .nav-logo span { color: var(--gold); }
+    .nav-back {
+      display: flex; align-items: center; gap: 0.45rem;
+      color: var(--muted); text-decoration: none;
+      font-size: 0.85rem; font-weight: 600;
+      padding: 0.4rem 0.85rem; border-radius: 50px;
+      border: 1px solid var(--border); background: var(--navy-card);
+      transition: color .2s, border-color .2s; margin-left: auto;
+    }
+    .nav-back:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+    .nav-back svg { width: 14px; height: 14px; }
+
+    /* ── Layout ── */
+    .page {
+      max-width: 1100px; margin: 0 auto;
+      padding: calc(var(--nav-h) + 2rem) 2rem 4rem;
+    }
+    #pageContent {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 2rem;
+      align-items: start;
+    }
+    .main-col { min-width: 0; }
+    @media (max-width: 860px) {
+      .page { padding: calc(var(--nav-h) + 1.2rem) 1rem 3rem; }
+      #pageContent { grid-template-columns: 1fr; }
+      .sidebar { order: -1; }
+    }
+
+    /* ── Foto principal ── */
+    .foto-hero {
+      width: 100%; height: 320px; border-radius: 18px;
+      background: var(--navy-card); margin-bottom: 1.5rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 5rem; position: relative; overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .foto-hero img { width: 100%; height: 100%; object-fit: cover; }
+    .foto-hero-emoji { font-size: 5rem; }
+    .foto-badge {
+      position: absolute; top: 1rem; left: 1rem;
+      background: var(--gold); color: var(--navy);
+      font-size: 0.75rem; font-weight: 800;
+      padding: 0.3rem 0.75rem; border-radius: 50px;
+    }
+
+    /* ── Galeria de fotos adicionais ── */
+    .foto-galeria {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .foto-galeria-item {
+      aspect-ratio: 4/3; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--border); cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .foto-galeria-item:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+    .foto-galeria-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* ── Lightbox ── */
+    .lightbox-overlay {
+      position: fixed; inset: 0; z-index: 999;
+      background: rgba(0,0,0,0.92); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    .lightbox-overlay.open { opacity: 1; pointer-events: all; }
+    .lightbox-img { max-width: 90vw; max-height: 88vh; border-radius: 14px; object-fit: contain; }
+    .lightbox-close {
+      position: absolute; top: 1.2rem; right: 1.4rem;
+      background: rgba(255,255,255,0.1); border: none; color: var(--text);
+      width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background .2s;
+    }
+    .lightbox-close:hover { background: rgba(255,255,255,0.2); }
+    .lightbox-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(255,255,255,0.1); border: none; color: var(--text);
+      width: 44px; height: 44px; border-radius: 50%; font-size: 1.4rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background .2s;
+    }
+    .lightbox-nav:hover { background: rgba(255,255,255,0.2); }
+    .lightbox-prev { left: 1.2rem; }
+    .lightbox-next { right: 1.2rem; }
+    .lightbox-counter {
+      position: absolute; bottom: 1.2rem; left: 50%; transform: translateX(-50%);
+      font-size: 0.82rem; color: rgba(255,255,255,0.6); font-weight: 600;
+    }
+
+    /* ── Header do imóvel ── */
+    .imovel-header { margin-bottom: 1.2rem; }
+    .imovel-titulo { font-size: 1.6rem; font-weight: 800; color: var(--text); margin-bottom: 0.4rem; line-height: 1.2; }
+    .imovel-loc {
+      display: flex; align-items: center; gap: 0.35rem;
+      font-size: 0.88rem; color: var(--muted); margin-bottom: 0.75rem;
+    }
+    .imovel-loc svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .imovel-chips { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+    .chip-tipo {
+      background: rgba(30,86,255,0.12); color: var(--blue-2);
+      border: 1px solid rgba(30,86,255,0.25);
+      font-size: 0.78rem; font-weight: 700;
+      padding: 0.25rem 0.75rem; border-radius: 50px;
+    }
+    .chip-stat {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.78rem; color: var(--muted); font-weight: 500;
+    }
+    .chip-stat svg { width: 13px; height: 13px; stroke: var(--muted); }
+    .imovel-preco-row {
+      display: flex; align-items: baseline; gap: 0.4rem;
+      margin-bottom: 0.5rem;
+    }
+    .imovel-preco { font-size: 2rem; font-weight: 800; color: var(--blue-2); }
+    .imovel-preco-label { font-size: 0.9rem; color: var(--muted); }
+
+    /* ── Seções ── */
+    .section { margin-bottom: 1.5rem; }
+    .section-card {
+      background: var(--navy-card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.4rem 1.5rem;
+      margin-bottom: 1.2rem;
+    }
+    .section-title { font-size: 1.05rem; font-weight: 800; color: var(--text); margin-bottom: 1rem; }
+
+    /* Sobre + vagas/status */
+    .descricao-text { font-size: 0.88rem; color: var(--muted); line-height: 1.65; }
+    .detalhes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; margin-top: 1rem; }
+    .detalhe-item { display: flex; flex-direction: column; gap: 0.2rem; }
+    .detalhe-label { font-size: 0.72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .detalhe-valor { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+    .status-badge {
+      display: inline-block; font-size: 0.78rem; font-weight: 700;
+      padding: 0.25rem 0.75rem; border-radius: 50px;
+    }
+    .status-disponivel { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
+    .status-brevemente { background: rgba(245,166,35,0.15); color: var(--gold); border: 1px solid rgba(245,166,35,0.25); }
+    .status-ocupado    { background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+
+    /* Comodidades */
+    .comod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.65rem; }
+    .comod-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: rgba(34,197,94,0.07); border: 1px solid rgba(34,197,94,0.18);
+      border-radius: 10px; padding: 0.55rem 0.8rem;
+      font-size: 0.82rem; font-weight: 600; color: var(--text);
+    }
+    .comod-item span { font-size: 1rem; }
+
+    /* Mapa placeholder */
+    .map-placeholder {
+      background: var(--navy-2); border: 1px solid var(--border);
+      border-radius: 12px; height: 160px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 0.5rem; color: var(--muted); font-size: 0.85rem;
+      margin-top: 1rem;
+    }
+    .map-placeholder svg { width: 28px; height: 28px; stroke: var(--muted); opacity: 0.5; }
+    .map-address { font-size: 0.82rem; color: var(--muted); margin-top: 0.5rem; text-align: center; }
+
+    /* Avaliações */
+    .stars-row { display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.5rem; }
+    .star-icon { width: 15px; height: 15px; fill: var(--gold); }
+    .stars-count { font-size: 1.1rem; font-weight: 800; color: var(--text); }
+    .stars-total { font-size: 0.82rem; color: var(--muted); }
+    .avaliacao-item {
+      padding: 1rem 0; border-bottom: 1px solid var(--border);
+    }
+    .avaliacao-item:last-child { border-bottom: none; }
+    .av-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+    .av-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--blue); display: flex; align-items: center;
+      justify-content: center; font-size: 0.75rem; font-weight: 800;
+      color: #fff; flex-shrink: 0;
+    }
+    .av-nome { font-size: 0.88rem; font-weight: 700; color: var(--text); }
+    .av-data { font-size: 0.75rem; color: var(--muted); }
+    .av-stars { display: flex; gap: 2px; }
+    .av-star { width: 12px; height: 12px; fill: var(--gold); }
+    .av-text { font-size: 0.85rem; color: var(--muted); line-height: 1.55; margin-top: 0.4rem; }
+    .av-empty { text-align: center; padding: 2rem 1rem; color: var(--muted); font-size: 0.88rem; }
+    .av-empty svg { width: 36px; height: 36px; stroke: var(--muted); opacity: 0.4; display: block; margin: 0 auto 0.75rem; }
+
+    /* Form nova avaliação */
+    .av-form { margin-top: 1.2rem; padding-top: 1.2rem; border-top: 1px solid var(--border); }
+    .av-form-title { font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 0.85rem; }
+    .stars-select { display: flex; gap: 0.3rem; margin-bottom: 0.75rem; }
+    .star-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 1.4rem; line-height: 1; padding: 0;
+      transition: transform .15s; color: var(--muted);
+    }
+    .star-btn.on { color: var(--gold); }
+    .star-btn:hover { transform: scale(1.15); }
+    .av-textarea {
+      width: 100%; background: var(--navy-input); border: 1px solid var(--border);
+      border-radius: 10px; padding: 0.75rem 1rem; color: var(--text);
+      font-family: inherit; font-size: 0.88rem; resize: vertical;
+      min-height: 80px; outline: none; margin-bottom: 0.75rem;
+      transition: border-color .2s;
+    }
+    .av-textarea:focus { border-color: rgba(30,86,255,0.5); box-shadow: 0 0 0 3px rgba(30,86,255,0.1); }
+    .btn-av-enviar {
+      background: var(--blue); color: #fff; border: none;
+      padding: 0.65rem 1.4rem; border-radius: 10px;
+      font-family: inherit; font-size: 0.88rem; font-weight: 700;
+      cursor: pointer; transition: background .18s, transform .18s;
+    }
+    .btn-av-enviar:hover { background: #2d64ff; transform: translateY(-1px); }
+    .btn-av-enviar:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Sidebar ── */
+    .sidebar { position: sticky; top: calc(var(--nav-h) + 1.5rem); align-self: start; }
+    /* Garante que o grid pai não impeça o sticky */
+    #pageContent { overflow: visible; }
+    html, body { overflow-x: hidden; overflow-y: auto; }
+    .sidebar-card {
+      background: var(--navy-card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.4rem; margin-bottom: 1rem;
+    }
+    .anfitriao-row { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.1rem; }
+    .anfitriao-avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--blue); display: flex; align-items: center;
+      justify-content: center; font-size: 1rem; font-weight: 800;
+      color: #fff; flex-shrink: 0; overflow: hidden;
+    }
+    .anfitriao-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .anfitriao-nome { font-size: 0.95rem; font-weight: 800; color: var(--text); }
+    .anfitriao-label { font-size: 0.75rem; color: var(--muted); }
+    .anfitriao-stars { display: flex; align-items: center; gap: 0.25rem; font-size: 0.78rem; color: var(--muted); margin-top: 0.15rem; }
+    .anfitriao-stars svg { width: 11px; height: 11px; fill: var(--gold); }
+
+    .btn-mensagem {
+      width: 100%; padding: 0.85rem; border-radius: 12px;
+      background: var(--blue); color: #fff; border: none;
+      font-family: inherit; font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; margin-bottom: 0.65rem;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      transition: background .18s, transform .18s;
+      box-shadow: 0 4px 18px rgba(30,86,255,0.35);
+    }
+    .btn-mensagem:hover { background: #2d64ff; transform: translateY(-1px); }
+    .btn-mensagem svg { width: 17px; height: 17px; }
+
+    .btn-ver-perfil {
+      width: 100%; padding: 0.72rem; border-radius: 12px;
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border);
+      font-family: inherit; font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; margin-bottom: 0.75rem;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      transition: border-color .2s, background .2s;
+    }
+    .btn-ver-perfil:hover { border-color: rgba(0,0,0,0.15); background: rgba(0,0,0,0.04); }
+    .btn-ver-perfil svg { width: 16px; height: 16px; stroke: var(--muted); }
+
+
+
+    .disponibilidade {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.82rem; color: var(--muted); padding-top: 0.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .disponibilidade svg { width: 15px; height: 15px; stroke: var(--green); }
+
+    /* Toast */
+    .toast {
+      position: fixed; top: 1.5rem; left: 50%;
+      transform: translateX(-50%) translateY(-120%);
+      background: #0e2a1a; border: 1px solid rgba(52,211,153,0.3);
+      color: #34d399; padding: 0.8rem 1.4rem; border-radius: 50px;
+      font-size: 0.88rem; font-weight: 600;
+      display: flex; align-items: center; gap: 0.5rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 9999;
+      transition: transform .35s cubic-bezier(0.22,1,0.36,1);
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.erro { background: #2a0e0e; border-color: rgba(248,113,113,0.3); color: #f87171; }
+  </style>
+  <link rel="stylesheet" href="tema.css" />
+  <script src="auth.js"></script>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="plataforma.html" class="nav-logo">FUS<span>HUB</span></a>
+    <a href="plataforma.html" class="nav-back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/>
+      </svg>
+      Voltar
+    </a>
+  </nav>
+
+  <div class="page" id="pageContent">
+    <!-- preenchido pelo JS -->
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const COMOD_ICONES = {
+      'Wi-Fi':'📶','Mobiliado':'🛋️','Lavanderia':'🧺','Garagem':'🚗',
+      'Pet friendly':'🐾','Academia':'🏋️','Segurança 24h':'🔒'
+    };
+
+    function carregarTodosImoveis() {
+      return FushubAuth.getTodosImoveis();
+    }
+
+    function statusLabel(s) {
+      if (s === 'brevemente') return { label: 'Disponível em breve', cls: 'status-brevemente' };
+      if (s === 'ocupado')    return { label: 'Ocupado', cls: 'status-ocupado' };
+      return { label: 'Disponível agora', cls: 'status-disponivel' };
+    }
+
+    function starsSVG(n) {
+      return Array.from({length:5}, (_,i) =>
+        `<svg class="av-star" viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" ${i < n ? 'fill="#f5a623"' : 'fill="rgba(255,255,255,0.15)"'} stroke="none"/></svg>`
+      ).join('');
+    }
+
+    // ── Chave de avaliações por imóvel ──────────────────────────────────
+    function chaveAvaliacoes(id) { return 'fushub_av_' + String(id); }
+
+    function carregarAvaliacoes(id) {
+      try { return JSON.parse(localStorage.getItem(chaveAvaliacoes(id)) || '[]'); } catch(e) { return []; }
+    }
+
+    function salvarAvaliacao(id, av) {
+      const lista = carregarAvaliacoes(id);
+      lista.push(av);
+      localStorage.setItem(chaveAvaliacoes(id), JSON.stringify(lista));
+      return lista;
+    }
+
+    // ── Perfil público do anfitrião ────────────────────────────────────
+    function getPerfilPublico(email) {
+      if (!email) return null;
+      try { return JSON.parse(localStorage.getItem('fushub_perfil_publico_' + email.toLowerCase()) || 'null'); } catch(e) { return null; }
+    }
+
+    // ── Estrelas selecionadas ─────────────────────────────────────────
+    let starsSel = 0;
+    function selectStar(n) {
+      starsSel = n;
+      document.querySelectorAll('.star-btn').forEach((btn, i) => {
+        btn.classList.toggle('on', i < n);
+      });
+    }
+
+    // ── Renderiza a página ─────────────────────────────────────────────
+    function renderPage() {
+      const id = sessionStorage.getItem('fushub_imovel_id');
+      if (!id) { window.location.replace('plataforma.html'); return; }
+
+      const todos = carregarTodosImoveis();
+      const im = todos.find(x => String(x.id) === String(id));
+      if (!im) { window.location.replace('plataforma.html'); return; }
+
+      document.title = im.titulo + ' — Fushub';
+
+      const avaliacoes = carregarAvaliacoes(id);
+      const todasAvs = [...(im.avaliacoes || []), ...avaliacoes];
+
+      // Calcula média de stars
+      let mediaStars = im.stars;
+      let totalAvaliacoes = im.reviews || 0;
+      if (todasAvs.length > 0) {
+        mediaStars = (todasAvs.reduce((s, a) => s + (a.stars || 5), 0) / todasAvs.length).toFixed(1);
+        totalAvaliacoes = todasAvs.length;
+      }
+
+      // Perfil do anfitrião
+      const donoEmail = im.donoEmail || '';
+      const perfil = getPerfilPublico(donoEmail);
+      const anfNome = perfil ? [perfil.nome, perfil.sobrenome].filter(Boolean).join(' ') : (im.donoNome || 'Anfitrião Fushub');
+      const anfInitials = anfNome.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase() || 'AF';
+      const anfAvatar = perfil && perfil.avatarUrl
+        ? `<img src="${perfil.avatarUrl}" alt="${anfNome}" />`
+        : anfInitials;
+      // Calcula média real das avaliações do perfil do anfitrião
+      let anfStarsMedia = '—';
+      if (donoEmail) {
+        try {
+          const avsPerfil = JSON.parse(localStorage.getItem('fushub_av_perfil_' + donoEmail.toLowerCase()) || '[]');
+          if (avsPerfil.length > 0) {
+            const media = (avsPerfil.reduce((s,a) => s + (a.stars||5), 0) / avsPerfil.length).toFixed(1);
+            anfStarsMedia = media + ' (' + avsPerfil.length + ')';
+          }
+        } catch(e) {}
+      }
+
+      // Status
+      const st = statusLabel(im.status);
+
+      // Comodidades HTML
+      const comodHtml = (im.comodidades || []).length
+        ? im.comodidades.map(c => `<div class="comod-item"><span>${COMOD_ICONES[c] || '✓'}</span> ${c}</div>`).join('')
+        : '<p style="color:var(--muted);font-size:0.85rem">Nenhuma comodidade informada</p>';
+
+      // Avaliações HTML
+      let avsHtml = '';
+      if (todasAvs.length === 0) {
+        avsHtml = `<div class="av-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+          Ainda não há avaliações para esta propriedade
+        </div>`;
+      } else {
+        avsHtml = todasAvs.map(av => `
+          <div class="avaliacao-item">
+            <div class="av-header">
+              <div class="av-avatar" style="background:${av.cor||'var(--blue)'}">${av.iniciais||'U'}</div>
+              <div>
+                <div class="av-nome">${av.nome || 'Usuário'}</div>
+                <div class="av-data">${av.data || ''}</div>
+              </div>
+              <div class="av-stars" style="margin-left:auto">${starsSVG(av.stars||5)}</div>
+            </div>
+            <div class="av-text">${av.texto || ''}</div>
+          </div>`).join('');
+      }
+
+      // Form de avaliação (só para logados)
+      const user = FushubAuth.getUser();
+      const formAv = user ? `
+        <div class="av-form">
+          <div class="av-form-title">Deixe sua avaliação</div>
+          <div class="stars-select" id="starsSelect">
+            ${[1,2,3,4,5].map(n => `<button class="star-btn" onclick="selectStar(${n})" title="${n} estrela${n>1?'s':''}">★</button>`).join('')}
+          </div>
+          <textarea class="av-textarea" id="avTexto" placeholder="Como foi sua experiência com este imóvel?"></textarea>
+          <button class="btn-av-enviar" onclick="enviarAvaliacao('${im.id}')">Publicar avaliação</button>
+        </div>` : `
+        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:0.82rem;color:var(--muted)">
+          <a href="entrar.html" style="color:var(--blue-2);font-weight:600">Entre na sua conta</a> para deixar uma avaliação.
+        </div>`;
+
+      // Endereço para o mapa
+      const enderecoCompleto = [im.rua, im.bairro, im.cidade, im.estado].filter(Boolean).join(', ');
+
+      document.getElementById('pageContent').innerHTML = `
+        <!-- COLUNA PRINCIPAL -->
+        <div class="main-col">
+
+          <!-- Foto -->
+          <div class="foto-hero">
+            ${im.imgCustom
+              ? `<img src="${im.imgCustom}" alt="${im.titulo}" />`
+              : `<div class="foto-hero-emoji">${im.emoji}</div>`
+            }
+            
+          </div>
+
+          <!-- Galeria de fotos adicionais -->
+          ${(im.fotosExtras && im.fotosExtras.length > 0) ? `
+          <div class="foto-galeria" id="fotoGaleria">
+            ${im.fotosExtras.map((src, i) => `
+              <div class="foto-galeria-item" onclick="abrirLightbox(${i})">
+                <img src="${src}" alt="Foto ${i+2}" loading="lazy" />
+              </div>`).join('')}
+          </div>` : ''}
+
+          <!-- Header -->
+          <div class="imovel-header">
+            <h1 class="imovel-titulo">${im.titulo}</h1>
+            <div class="imovel-loc">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              ${im.loc}${im.estado ? '/' + im.estado : ''}
+            </div>
+            <div class="imovel-chips">
+              <span class="chip-tipo">${im.tipo}</span>
+              ${im.quartos ? `<span class="chip-stat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20v-8a2 2 0 012-2h16a2 2 0 012 2v8"/><path d="M2 10V6a2 2 0 012-2h16a2 2 0 012 2v4"/></svg>${im.quartos} quarto${im.quartos>1?'s':''}</span>` : ''}
+              ${im.banheiros ? `<span class="chip-stat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6L9 3.5a2.5 2.5 0 015 0V6"/><path d="M4 6h16v14H4z"/></svg>${im.banheiros} banheiro${im.banheiros>1?'s':''}</span>` : ''}
+              ${im.moradores !== undefined ? `<span class="chip-stat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>${im.moradores} morador${im.moradores!==1?'es':''}</span>` : ''}
+              ${mediaStars > 0 ? `<span class="chip-stat"><svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:var(--gold);stroke:none"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>${mediaStars} (${todasAvs.length + im.reviews})</span>` : ''}
+            </div>
+            <div class="imovel-preco-row">
+              <div class="imovel-preco">R$ ${im.preco.toLocaleString('pt-BR')}</div>
+              <div class="imovel-preco-label">por mês</div>
+            </div>
+          </div>
+
+          <!-- Sobre esta moradia -->
+          <div class="section-card">
+            <div class="section-title">Sobre esta moradia</div>
+            <p class="descricao-text">${im.descricao || 'Sem descrição informada.'}</p>
+            <div class="detalhes-grid">
+              <div class="detalhe-item">
+                <div class="detalhe-label">Vagas disponíveis</div>
+                <div class="detalhe-valor">${im.vagas !== undefined ? im.vagas : '—'}</div>
+              </div>
+              <div class="detalhe-item">
+                <div class="detalhe-label">Status</div>
+                <div class="detalhe-valor"><span class="status-badge ${st.cls}">${st.label}</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comodidades -->
+          <div class="section-card">
+            <div class="section-title">Comodidades</div>
+            <div class="comod-grid">${comodHtml}</div>
+          </div>
+
+          <!-- Localização -->
+          <div class="section-card">
+            <div class="section-title">Localização</div>
+            <div class="map-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Mapa disponível em breve
+            </div>
+            ${enderecoCompleto ? `<p class="map-address">${enderecoCompleto}</p>` : ''}
+          </div>
+
+          <!-- Avaliações -->
+          <div class="section-card">
+            <div class="section-title">Avaliações</div>
+            ${todasAvs.length > 0 ? `<div class="stars-row">
+              <svg class="star-icon" viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              <span class="stars-count">${mediaStars}</span>
+              <span class="stars-total">(${todasAvs.length + im.reviews} avaliações)</span>
+            </div>` : '<p style="color:var(--muted);font-size:0.85rem;margin-bottom:0.5rem">Nenhuma avaliação ainda</p>'}
+            ${avsHtml}
+            ${formAv}
+          </div>
+
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+          <div class="sidebar-card">
+            <div class="anfitriao-row">
+              <div class="anfitriao-avatar">${anfAvatar}</div>
+              <div>
+                <div class="anfitriao-nome">${anfNome}</div>
+                <div class="anfitriao-label">Anunciante</div>
+                <div class="anfitriao-stars">
+                  <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                  ${anfStarsMedia}
+                </div>
+              </div>
+            </div>
+
+            <button class="btn-mensagem" onclick="enviarMensagem('${im.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              Enviar Mensagem
+            </button>
+
+            ${donoEmail ? `
+            <button class="btn-ver-perfil" onclick="verPerfil('${donoEmail}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Ver Perfil
+            </button>` : ''}
+
+            <div class="disponibilidade">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span class="${st.cls.replace('status-','')==='disponivel'?'':''}">
+                ${st.label}
+              </span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Inicializa estrelas do form
+      if (FushubAuth.getUser()) selectStar(5);
+    }
+
+    // ── Enviar avaliação ───────────────────────────────────────────────
+    function enviarAvaliacao(imovelId) {
+      const user = FushubAuth.getUser();
+      if (!user) { showToast('Entre na sua conta para avaliar.', true); return; }
+      if (starsSel === 0) { showToast('Selecione uma nota.', true); return; }
+      const texto = document.getElementById('avTexto').value.trim();
+      if (!texto) { showToast('Escreva sua avaliação antes de enviar.', true); return; }
+
+      const nome = [user.nome, user.sobrenome].filter(Boolean).join(' ') || user.email;
+      const initials = nome.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+      const cores = ['#1e56ff','#7c3aed','#e11d48','#059669','#d97706'];
+      const cor = cores[nome.charCodeAt(0) % cores.length];
+
+      const av = {
+        nome, iniciais: initials, cor,
+        stars: starsSel,
+        texto,
+        data: new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' }),
+      };
+
+      salvarAvaliacao(imovelId, av);
+      showToast('Avaliação publicada!');
+      setTimeout(() => renderPage(), 800);
+    }
+
+    // ── Ver perfil do anfitrião ───────────────────────────────────────
+    function verPerfil(email) {
+      sessionStorage.setItem('fushub_perfil_publico_email', email);
+      window.location.href = 'perfil-publico.html';
+    }
+
+    // ── Enviar mensagem ────────────────────────────────────────────────
+    function enviarMensagem(imovelId) {
+      const todos = FushubAuth.getTodosImoveis();
+      const im = todos.find(x => String(x.id) === String(imovelId));
+      if (!im) { window.location.href = 'mensagens.html'; return; }
+      // Busca avatarUrl do anfitrião para exibir no chat
+      let anfAvatarUrl = '';
+      try {
+        const p = JSON.parse(localStorage.getItem('fushub_perfil_publico_' + (im.donoEmail||'').toLowerCase()) || 'null');
+        if (p && p.avatarUrl) anfAvatarUrl = p.avatarUrl;
+      } catch(e) {}
+      sessionStorage.setItem('fushub_msg_imovel', String(imovelId));
+      sessionStorage.setItem('fushub_msg_dono_email', im.donoEmail || '');
+      sessionStorage.setItem('fushub_msg_imovel_titulo', im.titulo || '');
+      sessionStorage.setItem('fushub_msg_dono_avatar', anfAvatarUrl);
+      window.location.href = 'mensagens.html';
+    }
+
+    function showToast(msg, erro) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast' + (erro ? ' erro' : '');
+      void t.offsetWidth;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    function logout() { FushubAuth.logout(); }
+
+    // Inicia
+    renderPage();
+  </script>
+  <!-- LIGHTBOX -->
+  <div class="lightbox-overlay" id="lightboxOverlay" onclick="fecharLightbox(event)">
+    <button class="lightbox-close" onclick="fecharLightbox()">✕</button>
+    <button class="lightbox-nav lightbox-prev" onclick="navLightbox(-1, event)">‹</button>
+    <img class="lightbox-img" id="lightboxImg" src="" alt="" />
+    <button class="lightbox-nav lightbox-next" onclick="navLightbox(1, event)">›</button>
+    <div class="lightbox-counter" id="lightboxCounter"></div>
+  </div>
+
+  <script>
+    // ── Lightbox ───────────────────────────────────────────────────────
+    let _lbFotos = [];
+    let _lbIdx = 0;
+
+    function abrirLightbox(idx) {
+      const id = sessionStorage.getItem('fushub_imovel_id');
+      const todos = FushubAuth.getTodosImoveis();
+      const im = todos.find(x => String(x.id) === String(id));
+      if (!im || !im.fotosExtras || im.fotosExtras.length === 0) return;
+      _lbFotos = im.fotosExtras;
+      _lbIdx = idx;
+      _renderLightbox();
+      document.getElementById('lightboxOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function _renderLightbox() {
+      document.getElementById('lightboxImg').src = _lbFotos[_lbIdx];
+      document.getElementById('lightboxCounter').textContent = `${_lbIdx + 1} / ${_lbFotos.length}`;
+    }
+
+    function navLightbox(dir, e) {
+      if (e) e.stopPropagation();
+      _lbIdx = (_lbIdx + dir + _lbFotos.length) % _lbFotos.length;
+      _renderLightbox();
+    }
+
+    function fecharLightbox(e) {
+      if (e && e.target !== document.getElementById('lightboxOverlay') && !e.target.classList.contains('lightbox-close')) return;
+      document.getElementById('lightboxOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', e => {
+      const lb = document.getElementById('lightboxOverlay');
+      if (!lb.classList.contains('open')) return;
+      if (e.key === 'Escape') fecharLightbox({ target: lb });
+      if (e.key === 'ArrowLeft') navLightbox(-1);
+      if (e.key === 'ArrowRight') navLightbox(1);
+    });
+  </script>
+</body>
+</html>

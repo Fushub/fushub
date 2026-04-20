@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastrar — Fushub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:        #1e56ff;
+      --blue-2:      #3b73ff;
+      --bg:          #ffffff;
+      --bg-card:     #ffffff;
+      --bg-input:    #f5f7fc;
+      --border-2:    rgba(0,0,0,0.13);
+      --border:      rgba(0,0,0,0.08);
+      --border-focus:rgba(30,86,255,0.5);
+      --muted:       #6b7fa3;
+      --text:        #1a2540;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page-bg {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 2rem 1rem 3rem;
+      position: relative; overflow: hidden;
+    }
+    .page-bg::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: radial-gradient(rgba(30,86,255,0.06) 1px, transparent 1px);
+      background-size: 28px 28px; pointer-events: none; z-index: 0;
+    }
+    .page-bg::after {
+      content: ''; position: fixed;
+      width: 700px; height: 500px;
+      background: radial-gradient(ellipse, rgba(30,86,255,0.07) 0%, transparent 65%);
+      top: -160px; left: 50%; transform: translateX(-50%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .btn-back {
+      position: fixed; top: 1.2rem; left: 1.2rem; z-index: 10;
+      display: flex; align-items: center; gap: 0.45rem;
+      background: var(--bg-card); border: 1px solid var(--border-2);
+      color: var(--muted); padding: 0.5rem 0.9rem 0.5rem 0.7rem;
+      border-radius: 50px; font-family: inherit; font-size: 0.82rem;
+      font-weight: 600; cursor: pointer; text-decoration: none;
+      transition: color .2s, border-color .2s, box-shadow .2s;
+    }
+    .btn-back:hover {
+      color: var(--text); border-color: var(--blue);
+      box-shadow: 0 4px 16px rgba(30,86,255,0.12);
+    }
+    .btn-back svg { transition: transform .2s; }
+    .btn-back:hover svg { transform: translateX(-3px); }
+
+    .card {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 480px;
+      background: var(--bg-card); border: 1px solid var(--border-2);
+      border-radius: 24px; padding: 2.6rem 2.4rem 2.4rem;
+      box-shadow:
+        
+        0 8px 40px rgba(0,0,0,0.1),
+        0 2px 12px rgba(0,0,0,0.06);
+      opacity: 0; transform: translateY(28px);
+      animation: cardIn .55s cubic-bezier(0.22,1,0.36,1) .1s forwards;
+    }
+    @keyframes cardIn { to { opacity: 1; transform: none; } }
+
+    .logo-wrap { text-align: center; margin-bottom: 1.8rem; }
+
+    .card-title {
+      text-align: center; font-size: 1.6rem; font-weight: 800;
+      color: var(--text); line-height: 1.2; margin-bottom: 0.45rem;
+    }
+    .card-sub { text-align: center; font-size: 0.875rem; color: var(--muted); margin-bottom: 2rem; }
+    .card-divider { height: 1px; background: var(--border); margin-bottom: 1.8rem; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+
+    .field { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 0.85rem; }
+    .field label {
+      font-size: 0.78rem; font-weight: 600; color: var(--muted);
+      letter-spacing: 0.03em; text-transform: uppercase;
+    }
+    .field label .opt {
+      font-weight: 400; color: var(--muted);
+      text-transform: none; letter-spacing: 0; font-size: 0.72rem; margin-left: 0.3rem;
+    }
+    .field input {
+      background: var(--bg-input); border: 1px solid var(--border-2);
+      border-radius: 10px; padding: 0.72rem 0.95rem;
+      color: var(--text); font-family: inherit; font-size: 0.92rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      -webkit-appearance: none; width: 100%;
+    }
+    .field input[type="password"]::-ms-reveal,
+    .field input[type="password"]::-ms-clear { display: none !important; }
+
+    .field input::placeholder { color: var(--muted); }
+    .field input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(30,86,255,0.12);
+      background: #fff;
+    }
+
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 2.8rem; }
+    .pw-toggle {
+      position: absolute; right: 0.75rem; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none; outline: none;
+      cursor: pointer; color: var(--muted); padding: 0.2rem;
+      display: flex; align-items: center; justify-content: center;
+      line-height: 0; transition: color .2s;
+    }
+    .pw-toggle:hover { color: var(--text); }
+    .pw-toggle svg { display: block; }
+
+    .btn-submit {
+      width: 100%; margin-top: 1.6rem; padding: 0.88rem;
+      background: var(--blue); color: #fff; border: none;
+      border-radius: 12px; font-family: inherit;
+      font-size: 0.97rem; font-weight: 700; cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: transform .18s, box-shadow .18s, background .18s;
+      box-shadow: 0 4px 20px rgba(30,86,255,0.38);
+    }
+    .btn-submit::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(30,86,255,0.5); background: #2d64ff;
+    }
+    .btn-submit:active { transform: translateY(0); }
+    .btn-submit:disabled { opacity: 0.65; cursor: not-allowed; }
+    .btn-submit .btn-spinner {
+      display: none; width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+      border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto;
+    }
+    .btn-submit.loading .btn-label { display: none; }
+    .btn-submit.loading .btn-spinner { display: block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast {
+      position: fixed;
+      top: 1.5rem; left: 50%; transform: translateX(-50%) translateY(-120%);
+      background: #0e2a1a; border: 1px solid rgba(52,211,153,0.3);
+      color: #34d399; padding: 0.85rem 1.5rem; border-radius: 50px;
+      font-size: 0.9rem; font-weight: 600;
+      display: flex; align-items: center; gap: 0.6rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 9999;
+      transition: transform .4s cubic-bezier(0.22,1,0.36,1); white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    .login-link { text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: var(--muted); }
+    .login-link a { color: var(--blue-2); text-decoration: none; font-weight: 600; transition: color .2s; }
+    .login-link a:hover { color: var(--blue); }
+
+    .field input.error {
+      border-color: rgba(248,113,113,0.5);
+      box-shadow: 0 0 0 3px rgba(248,113,113,0.1);
+    }
+    .field-err { font-size: 0.72rem; color: #f87171; display: none; }
+    .field-err.show { display: block; }
+
+    .page-footer {
+      position: relative; z-index: 1; margin-top: 2rem;
+      font-size: 0.75rem; color: var(--muted); text-align: center;
+    }
+
+    @media (max-width: 520px) {
+      .card { padding: 2rem 1.4rem 2rem; border-radius: 20px; }
+      .form-row { grid-template-columns: 1fr; gap: 0; }
+      .card-title { font-size: 1.35rem; }
+    }
+  </style>
+  <script src="auth.js" data-public data-no-tema></script>
+</head>
+<body>
+  <div class="page-bg">
+
+    <a href="index.html" class="btn-back">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12,19 5,12 12,5"/>
+      </svg>
+      Início
+    </a>
+
+    <div class="toast" id="toast">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20,6 9,17 4,12"/>
+      </svg>
+      Conta criada com sucesso!
+    </div>
+
+    <div class="card">
+
+      <div class="logo-wrap">
+        <img src="logotipo_fushub.png" alt="Fushub" width="72" height="72" />
+      </div>
+
+      <h1 class="card-title">Bem-vindo ao Fushub</h1>
+      <p class="card-sub">Crie sua conta para continuar</p>
+
+      <div class="card-divider"></div>
+
+      <form id="signupForm" novalidate>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="nome">Nome</label>
+            <input id="nome" type="text" placeholder="João" autocomplete="given-name" />
+            <span class="field-err" id="err-nome">Preencha seu nome</span>
+          </div>
+          <div class="field">
+            <label for="sobrenome">Sobrenome</label>
+            <input id="sobrenome" type="text" placeholder="Silva" autocomplete="family-name" />
+            <span class="field-err" id="err-sobrenome">Preencha seu sobrenome</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="telefone">Telefone</label>
+          <input id="telefone" type="tel" placeholder="(11) 99999-9999" autocomplete="tel" />
+          <span class="field-err" id="err-telefone">Informe um telefone válido</span>
+        </div>
+
+        <div class="field">
+          <label for="email">E-mail</label>
+          <input id="email" type="email" placeholder="joao@email.com" autocomplete="email" />
+          <span class="field-err" id="err-email">Informe um e-mail válido</span>
+        </div>
+
+        <div class="field">
+          <label for="senha">Senha</label>
+          <div class="pw-wrap">
+            <input id="senha" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+            <button type="button" class="pw-toggle" onclick="toggleSenha('senha','eyeIcon')" aria-label="Mostrar/ocultar senha">
+              <svg id="eyeIcon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <span class="field-err" id="err-senha">Mínimo de 6 caracteres</span>
+        </div>
+
+        <div class="field">
+          <label for="confirma-senha">Confirmar senha</label>
+          <div class="pw-wrap">
+            <input id="confirma-senha" type="password" placeholder="Repita a senha" autocomplete="new-password" />
+            <button type="button" class="pw-toggle" onclick="toggleSenha('confirma-senha','eyeIcon2')" aria-label="Mostrar/ocultar senha">
+              <svg id="eyeIcon2" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <span class="field-err" id="err-confirma-senha">As senhas não coincidem</span>
+        </div>
+
+        <div class="field">
+          <label for="faculdade">Faculdade <span class="opt">— opcional</span></label>
+          <input id="faculdade" type="text" placeholder="Ex.: USP, UNICAMP, UFMG…" autocomplete="organization" />
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <span class="btn-label">Criar conta</span>
+          <span class="btn-spinner"></span>
+        </button>
+
+      </form>
+
+      <p class="login-link">Já tem conta? <a href="entrar.html">Entrar</a></p>
+
+    </div>
+
+    <p class="page-footer">© 2026 Fushub · <a href="#" style="color:inherit">Privacidade</a> · <a href="#" style="color:inherit">Termos</a></p>
+
+  </div>
+
+  <script>
+    document.getElementById('telefone').addEventListener('input', function () {
+      let v = this.value.replace(/\D/g, '').slice(0, 11);
+      if (v.length > 6) v = '(' + v.slice(0,2) + ') ' + v.slice(2,7) + '-' + v.slice(7);
+      else if (v.length > 2) v = '(' + v.slice(0,2) + ') ' + v.slice(2);
+      else if (v.length > 0) v = '(' + v;
+      this.value = v;
+    });
+
+    // Indicador de força de senha
+    document.getElementById('senha').addEventListener('input', function () {
+      const v = this.value;
+      const errEl = document.getElementById('err-senha');
+      if (v.length === 0) { errEl.classList.remove('show'); return; }
+      if (v.length < 6) {
+        errEl.textContent = 'Mínimo de 6 caracteres';
+        errEl.style.color = '#f87171';
+        errEl.classList.add('show');
+      } else if (v.length < 8) {
+        errEl.textContent = 'Senha fraca — tente adicionar números ou símbolos';
+        errEl.style.color = '#fb923c';
+        errEl.classList.add('show');
+      } else {
+        errEl.textContent = 'Senha forte ✓';
+        errEl.style.color = '#34d399';
+        errEl.classList.add('show');
+      }
+      this.classList.remove('error');
+    });
+
+    // Verifica confirmação em tempo real
+    document.getElementById('confirma-senha').addEventListener('input', function () {
+      const senha    = document.getElementById('senha').value;
+      const errEl    = document.getElementById('err-confirma-senha');
+      if (this.value.length === 0) { errEl.classList.remove('show'); return; }
+      if (this.value !== senha) {
+        errEl.textContent = 'As senhas não coincidem';
+        errEl.style.color = '#f87171';
+        errEl.classList.add('show');
+        this.classList.add('error');
+      } else {
+        errEl.textContent = 'Senhas coincidem ✓';
+        errEl.style.color = '#34d399';
+        errEl.classList.add('show');
+        this.classList.remove('error');
+      }
+    });
+
+    // Aviso de e-mail já cadastrado em tempo real
+    document.getElementById('email').addEventListener('blur', function () {
+      const v     = this.value.trim();
+      const errEl = document.getElementById('err-email');
+      if (!v || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return;
+      if (FushubAuth.emailExiste(v)) {
+        errEl.textContent = 'Este e-mail já tem conta. Que tal entrar?';
+        errEl.classList.add('show');
+        this.classList.add('error');
+      }
+    });
+
+    function toggleSenha(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon  = document.getElementById(iconId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = `
+          <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>
+          <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>
+          <line x1="1" y1="1" x2="23" y2="23"/>`;
+      } else {
+        input.type = 'password';
+        icon.innerHTML = `
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>`;
+      }
+    }
+
+    document.getElementById('signupForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const fields = [
+        { id: 'nome',           errId: 'err-nome',           msg: 'Informe seu nome (mínimo 2 letras)',      check: v => v.trim().length >= 2 },
+        { id: 'sobrenome',      errId: 'err-sobrenome',      msg: 'Informe seu sobrenome (mínimo 2 letras)', check: v => v.trim().length >= 2 },
+        { id: 'telefone',       errId: 'err-telefone',       msg: 'Informe um telefone válido',              check: v => v.replace(/\D/g,'').length >= 10 },
+        { id: 'email',          errId: 'err-email',          msg: 'Informe um e-mail válido',                check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+        { id: 'senha',          errId: 'err-senha',          msg: 'Mínimo de 6 caracteres',                 check: v => v.length >= 6 },
+        { id: 'confirma-senha', errId: 'err-confirma-senha', msg: 'As senhas não coincidem',                check: v => v === document.getElementById('senha').value },
+      ];
+
+      let valid = true;
+      fields.forEach(({ id, errId, msg, check }) => {
+        const input = document.getElementById(id);
+        const err   = document.getElementById(errId);
+        const ok    = check(input.value);
+        input.classList.toggle('error', !ok);
+        if (!ok) {
+          err.textContent = msg;
+          err.style.color = '#f87171';
+          err.classList.add('show');
+          valid = false;
+        } else {
+          err.classList.remove('show');
+        }
+      });
+      if (!valid) return;
+
+      const btn = document.getElementById('submitBtn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      setTimeout(() => {
+        const resultado = FushubAuth.registrar({
+          nome:      document.getElementById('nome').value.trim(),
+          sobrenome: document.getElementById('sobrenome').value.trim(),
+          telefone:  document.getElementById('telefone').value.trim(),
+          email:     document.getElementById('email').value.trim(),
+          senha:     document.getElementById('senha').value,
+          faculdade: document.getElementById('faculdade').value.trim(),
+        });
+
+        if (!resultado.ok) {
+          btn.classList.remove('loading');
+          btn.disabled = false;
+          // E-mail duplicado — mostra no campo de email
+          const errEmail = document.getElementById('err-email');
+          errEmail.textContent = resultado.erro;
+          errEmail.style.color = '#f87171';
+          errEmail.classList.add('show');
+          document.getElementById('email').classList.add('error');
+          return;
+        }
+
+        // Conta criada e sessão iniciada com sucesso
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => {
+          toast.classList.remove('show');
+          window.location.href = 'plataforma.html';
+        }, 1800);
+
+      }, 800);
+    });
+
+    document.querySelectorAll('.field input').forEach(input => {
+      input.addEventListener('input', () => {
+        // Limpa erros ao começar a digitar (exceto campos com feedback ao vivo)
+        const liveFields = ['senha', 'confirma-senha'];
+        if (liveFields.includes(input.id)) return;
+        input.classList.remove('error');
+        const errEl = document.getElementById('err-' + input.id);
+        if (errEl) errEl.classList.remove('show');
+      });
+    });
+  </script>
+</body>
+</html>

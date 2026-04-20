@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entrar — Fushub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:        #1e56ff;
+      --blue-2:      #3b73ff;
+      --gold:        #f0a500;
+      --bg:          #ffffff;
+      --bg-card:     #ffffff;
+      --bg-input:    #f5f7fc;
+      --border:      rgba(0,0,0,0.08);
+      --border-2:    rgba(0,0,0,0.13);
+      --border-focus:rgba(30,86,255,0.45);
+      --muted:       #6b7fa3;
+      --text:        #1a2540;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page-bg {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-bg::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: radial-gradient(rgba(30,86,255,0.06) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .page-bg::after {
+      content: '';
+      position: fixed;
+      width: 700px; height: 500px;
+      background: radial-gradient(ellipse, rgba(30,86,255,0.07) 0%, transparent 65%);
+      top: -160px; left: 50%; transform: translateX(-50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Seta voltar ── */
+    .btn-back {
+      position: fixed;
+      top: 1.2rem; left: 1.2rem;
+      z-index: 10;
+      display: flex; align-items: center; gap: 0.45rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-2);
+      color: var(--muted);
+      padding: 0.5rem 0.9rem 0.5rem 0.7rem;
+      border-radius: 50px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color .2s, border-color .2s, box-shadow .2s;
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-back:hover {
+      color: var(--text);
+      border-color: var(--blue);
+      box-shadow: 0 4px 16px rgba(30,86,255,0.12);
+    }
+    .btn-back svg { transition: transform .2s; }
+    .btn-back:hover svg { transform: translateX(-3px); }
+
+    /* ── Card ── */
+    .card {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 420px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-2);
+      border-radius: 24px;
+      padding: 2.6rem 2.4rem 2.4rem;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.1), 0 2px 12px rgba(0,0,0,0.06);
+      opacity: 0;
+      transform: translateY(28px);
+      animation: cardIn .55s cubic-bezier(0.22,1,0.36,1) .1s forwards;
+    }
+    @keyframes cardIn { to { opacity: 1; transform: none; } }
+
+    .logo-wrap { text-align: center; margin-bottom: 1.8rem; }
+    .logo-wrap img { display: block; margin: 0 auto; }
+
+    .card-title {
+      text-align: center; font-size: 1.6rem; font-weight: 800;
+      color: var(--text); line-height: 1.2; margin-bottom: 0.45rem;
+    }
+    .card-sub {
+      text-align: center; font-size: 0.875rem;
+      color: var(--muted); margin-bottom: 2rem;
+    }
+    .card-divider { height: 1px; background: var(--border); margin-bottom: 1.8rem; }
+
+    /* ── Campos ── */
+    .field {
+      display: flex; flex-direction: column;
+      gap: 0.45rem; margin-bottom: 0.85rem;
+    }
+    .field label {
+      font-size: 0.78rem; font-weight: 600; color: var(--muted);
+      letter-spacing: 0.03em; text-transform: uppercase;
+    }
+    .field input {
+      background: var(--bg-input);
+      border: 1px solid var(--border-2);
+      border-radius: 10px;
+      padding: 0.72rem 0.95rem;
+      color: var(--text);
+      font-family: inherit; font-size: 0.92rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      -webkit-appearance: none;
+      width: 100%;
+      -webkit-text-security: none;
+    }
+    /* Remove olho nativo em todos os browsers */
+    .field input[type="password"]::-ms-reveal,
+    .field input[type="password"]::-ms-clear,
+    .field input[type="password"]::-webkit-contacts-auto-fill-button,
+    .field input[type="password"]::-webkit-credentials-auto-fill-button { display: none !important; }
+    .field input::-webkit-inner-spin-button,
+    .field input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    .field input::placeholder { color: var(--muted); opacity: 0.6; }
+    .field input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(30,86,255,0.1);
+      background: #fff;
+    }
+
+    /* ── Wrapper senha ── */
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 2.8rem; }
+
+    /* Esconde o olho nativo do Edge/IE/Chrome */
+    .pw-wrap input::-ms-reveal { display: none; }
+    .pw-wrap input::-webkit-credentials-auto-fill-button { display: none; }
+
+    .pw-toggle {
+      position: absolute; right: 0.75rem; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none; outline: none;
+      cursor: pointer; color: var(--muted); padding: 0.2rem;
+      display: flex; align-items: center; justify-content: center;
+      line-height: 0; /* garante que não há altura extra */
+      transition: color .2s;
+    }
+    .pw-toggle:hover { color: var(--text); }
+    .pw-toggle svg { display: block; } /* bloqueia inline gaps */
+
+    /* ── Esqueceu a senha ── */
+    .forgot-link {
+      font-size: 0.78rem; color: var(--blue-2);
+      text-decoration: none; font-weight: 600;
+      align-self: flex-end; margin-top: 0.1rem;
+      transition: color .2s;
+    }
+    .forgot-link:hover { color: var(--blue); }
+
+    /* ── Botão ── */
+    .btn-submit {
+      width: 100%; margin-top: 1.6rem; padding: 0.88rem;
+      background: var(--blue); color: #fff; border: none;
+      border-radius: 12px; font-family: inherit;
+      font-size: 0.97rem; font-weight: 700; cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: transform .18s, box-shadow .18s, background .18s;
+      box-shadow: 0 4px 20px rgba(30,86,255,0.38);
+    }
+    .btn-submit::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(30,86,255,0.5);
+      background: #2d64ff;
+    }
+    .btn-submit:active { transform: translateY(0); }
+    .btn-submit:disabled { opacity: 0.65; cursor: not-allowed; }
+    .btn-submit .btn-spinner {
+      display: none; width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin .7s linear infinite; margin: 0 auto;
+    }
+    .btn-submit.loading .btn-label { display: none; }
+    .btn-submit.loading .btn-spinner { display: block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      top: 1.5rem; left: 50%; transform: translateX(-50%) translateY(-120%);
+      background: #0e2a1a; border: 1px solid rgba(52,211,153,0.3);
+      color: #34d399; padding: 0.85rem 1.5rem; border-radius: 50px;
+      font-size: 0.9rem; font-weight: 600;
+      display: flex; align-items: center; gap: 0.6rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 9999;
+      transition: transform .4s cubic-bezier(0.22,1,0.36,1);
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    .signup-link {
+      text-align: center; margin-top: 1.5rem;
+      font-size: 0.85rem; color: var(--muted);
+    }
+    .signup-link a {
+      color: var(--blue-2); text-decoration: none;
+      font-weight: 600; transition: color .2s;
+    }
+    .signup-link a:hover { color: var(--blue); }
+
+    .field input.error {
+      border-color: rgba(248,113,113,0.5);
+      box-shadow: 0 0 0 3px rgba(248,113,113,0.1);
+    }
+    .field-err { font-size: 0.72rem; color: #f87171; display: none; }
+    .field-err.show { display: block; }
+
+    .page-footer {
+      position: relative; z-index: 1; margin-top: 2rem;
+      font-size: 0.75rem; color: var(--muted); text-align: center;
+    }
+
+    @media (max-width: 520px) {
+      .card { padding: 2rem 1.4rem 2rem; border-radius: 20px; }
+      .card-title { font-size: 1.35rem; }
+    }
+
+    /* ── Recuperação de senha ── */
+    .recovery-step { display: none; }
+    .recovery-step.active { display: block; }
+
+    .code-inputs {
+      display: flex; gap: 0.6rem; justify-content: center; margin: 1.4rem 0;
+    }
+    .code-inputs input {
+      width: 46px; height: 54px; border-radius: 12px;
+      border: 1.5px solid var(--border-2);
+      background: var(--bg-input);
+      text-align: center; font-size: 1.4rem; font-weight: 800;
+      color: var(--text); font-family: inherit; outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      caret-color: var(--blue);
+    }
+    .code-inputs input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(30,86,255,0.1);
+      background: #fff;
+    }
+    .code-inputs input.filled { border-color: var(--blue); background: rgba(30,86,255,0.04); }
+    .code-inputs input.error-digit { border-color: rgba(248,113,113,0.6); box-shadow: 0 0 0 3px rgba(248,113,113,0.1); }
+
+    .resend-row {
+      text-align: center; font-size: 0.82rem; color: var(--muted); margin-top: 0.5rem;
+    }
+    .resend-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--blue); font-family: inherit; font-size: 0.82rem;
+      font-weight: 600; padding: 0; transition: color .2s;
+    }
+    .resend-btn:hover { color: var(--blue-2); }
+    .resend-btn:disabled { color: var(--muted); cursor: not-allowed; }
+    .resend-countdown { font-weight: 600; color: var(--blue); }
+
+    .recovery-info {
+      background: rgba(30,86,255,0.06); border: 1px solid rgba(30,86,255,0.15);
+      border-radius: 10px; padding: 0.75rem 1rem;
+      font-size: 0.83rem; color: var(--text-soft);
+      display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.4rem;
+    }
+    .recovery-info svg { flex-shrink: 0; stroke: var(--blue); }
+    .recovery-info strong { color: var(--blue); }
+
+    .pw-strength {
+      height: 4px; border-radius: 2px; background: var(--border-2);
+      margin-top: 0.4rem; overflow: hidden;
+    }
+    .pw-strength-bar {
+      height: 100%; border-radius: 2px;
+      transition: width .3s, background .3s;
+      width: 0%;
+    }
+    .pw-strength-label {
+      font-size: 0.72rem; margin-top: 0.3rem; font-weight: 600;
+    }
+
+    .back-link {
+      display: flex; align-items: center; gap: 0.35rem;
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-family: inherit; font-size: 0.82rem;
+      font-weight: 600; padding: 0; margin-bottom: 1.4rem;
+      transition: color .2s;
+    }
+    .back-link:hover { color: var(--text); }
+    .back-link svg { transition: transform .2s; }
+    .back-link:hover svg { transform: translateX(-3px); }
+  </style>
+  <script src="auth.js" data-public data-no-tema></script>
+</head>
+<body>
+  <div class="page-bg">
+
+    <a href="index.html" class="btn-back">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12,19 5,12 12,5"/>
+      </svg>
+      Início
+    </a>
+
+    <div class="toast" id="toast">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20,6 9,17 4,12"/>
+      </svg>
+      Bem-vindo de volta!
+    </div>
+
+    <div class="card">
+
+      <div class="logo-wrap">
+        <img src="logotipo_fushub.png" alt="Fushub" width="72" height="72" />
+      </div>
+
+      <h1 class="card-title">Bem-vindo de volta</h1>
+      <p class="card-sub">Entre na sua conta para continuar</p>
+
+      <div class="card-divider"></div>
+
+      <form id="loginForm" novalidate>
+
+        <div class="field">
+          <label for="email">E-mail</label>
+          <input id="email" type="email" placeholder="joao@email.com" autocomplete="email" />
+          <span class="field-err" id="err-email">Informe um e-mail válido</span>
+        </div>
+
+        <div class="field">
+          <label for="senha">Senha</label>
+          <div class="pw-wrap">
+            <input id="senha" type="password" placeholder="Sua senha" autocomplete="current-password" />
+            <button type="button" class="pw-toggle" onclick="toggleSenha()" aria-label="Mostrar/ocultar senha">
+              <svg id="eyeIcon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <span class="field-err" id="err-senha">Preencha sua senha</span>
+          <button type="button" class="forgot-link" onclick="mostrarRecuperacao()">Esqueceu a senha?</button>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <span class="btn-label">Entrar</span>
+          <span class="btn-spinner"></span>
+        </button>
+
+      </form>
+
+      <p class="signup-link">Não tem conta? <a href="cadastro.html">Cadastrar</a></p>
+
+    </div>
+
+    <!-- ── CARD RECUPERAÇÃO DE SENHA ── -->
+    <div class="card" id="cardRecuperacao" style="display:none">
+
+      <div class="logo-wrap">
+        <img src="logotipo_fushub.png" alt="Fushub" width="72" height="72" />
+      </div>
+
+      <!-- PASSO 1: Informe o e-mail -->
+      <div class="recovery-step active" id="step1">
+        <button type="button" class="back-link" onclick="voltarLogin()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/>
+          </svg>
+          Voltar ao login
+        </button>
+        <h1 class="card-title">Recuperar senha</h1>
+        <p class="card-sub">Informe seu e-mail e enviaremos um código de verificação</p>
+        <div class="card-divider"></div>
+        <div class="field">
+          <label for="rec-email">E-mail cadastrado</label>
+          <input id="rec-email" type="email" placeholder="joao@email.com" autocomplete="email" />
+          <span class="field-err" id="err-rec-email">Informe um e-mail válido</span>
+        </div>
+        <button type="button" class="btn-submit" id="btnEnviarCodigo" onclick="enviarCodigo()">
+          <span class="btn-label">Enviar código</span>
+          <span class="btn-spinner"></span>
+        </button>
+      </div>
+
+      <!-- PASSO 2: Inserir código -->
+      <div class="recovery-step" id="step2">
+        <button type="button" class="back-link" onclick="irStep(1)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/>
+          </svg>
+          Voltar
+        </button>
+        <h1 class="card-title">Código enviado</h1>
+        <p class="card-sub" id="step2Sub">Digite o código de 6 dígitos enviado para o seu e-mail</p>
+        <div class="card-divider"></div>
+        <div class="recovery-info">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+          </svg>
+          <span>Código enviado para <strong id="emailDestino"></strong></span>
+        </div>
+        <div class="code-inputs" id="codeInputs">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+        </div>
+        <span class="field-err" id="err-code" style="display:none;text-align:center;margin-bottom:0.75rem">Código incorreto. Tente novamente.</span>
+        <button type="button" class="btn-submit" id="btnVerificarCodigo" onclick="verificarCodigo()">
+          <span class="btn-label">Verificar código</span>
+          <span class="btn-spinner"></span>
+        </button>
+        <div class="resend-row" style="margin-top:1rem">
+          Não recebeu? 
+          <button type="button" class="resend-btn" id="resendBtn" onclick="reenviarCodigo()" disabled>
+            Reenviar <span class="resend-countdown" id="resendCountdown">(60s)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- PASSO 3: Nova senha -->
+      <div class="recovery-step" id="step3">
+        <h1 class="card-title">Nova senha</h1>
+        <p class="card-sub">Escolha uma senha segura para sua conta</p>
+        <div class="card-divider"></div>
+        <div class="field">
+          <label for="nova-senha">Nova senha</label>
+          <div class="pw-wrap">
+            <input id="nova-senha" type="password" placeholder="Mínimo 6 caracteres" oninput="atualizarForca(this.value)" />
+            <button type="button" class="pw-toggle" onclick="toggleNovaSenha('nova-senha','eyeNova')" aria-label="Mostrar senha">
+              <svg id="eyeNova" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <div class="pw-strength"><div class="pw-strength-bar" id="forcaBar"></div></div>
+          <div class="pw-strength-label" id="forcaLabel"></div>
+          <span class="field-err" id="err-nova-senha">A senha deve ter pelo menos 6 caracteres</span>
+        </div>
+        <div class="field">
+          <label for="conf-senha">Confirmar senha</label>
+          <div class="pw-wrap">
+            <input id="conf-senha" type="password" placeholder="Repita a nova senha" />
+            <button type="button" class="pw-toggle" onclick="toggleNovaSenha('conf-senha','eyeConf')" aria-label="Mostrar senha">
+              <svg id="eyeConf" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <span class="field-err" id="err-conf-senha">As senhas não coincidem</span>
+        </div>
+        <button type="button" class="btn-submit" id="btnRedefinir" onclick="redefinirSenha()">
+          <span class="btn-label">Redefinir senha</span>
+          <span class="btn-spinner"></span>
+        </button>
+      </div>
+
+    </div>
+
+    <p class="page-footer">© 2025 Fushub · <a href="#" style="color:inherit">Privacidade</a> · <a href="#" style="color:inherit">Termos</a></p>
+
+  </div>
+
+  <script>
+    function toggleSenha() {
+      const input = document.getElementById('senha');
+      const icon  = document.getElementById('eyeIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = `
+          <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>
+          <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>
+          <line x1="1" y1="1" x2="23" y2="23"/>`;
+      } else {
+        input.type = 'password';
+        icon.innerHTML = `
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>`;
+      }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      // Validação básica de formato
+      const fields = [
+        { id: 'email', errId: 'err-email', check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+        { id: 'senha', errId: 'err-senha', check: v => v.length >= 1 },
+      ];
+      let valid = true;
+      fields.forEach(({ id, errId, check }) => {
+        const input = document.getElementById(id);
+        const err   = document.getElementById(errId);
+        const ok    = check(input.value);
+        input.classList.toggle('error', !ok);
+        err.classList.toggle('show', !ok);
+        if (!ok) valid = false;
+      });
+      if (!valid) return;
+
+      const btn   = document.getElementById('submitBtn');
+      const email = document.getElementById('email').value.trim();
+      const senha = document.getElementById('senha').value;
+
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      // Pequeno delay para UX (simula latência de rede)
+      setTimeout(() => {
+        const resultado = FushubAuth.entrar(email, senha);
+
+        if (!resultado.ok) {
+          btn.classList.remove('loading');
+          btn.disabled = false;
+
+          // Mostra o erro no campo correto
+          if (resultado.erro.includes('E-mail')) {
+            const errEmail = document.getElementById('err-email');
+            const inputEmail = document.getElementById('email');
+            errEmail.textContent = resultado.erro;
+            errEmail.classList.add('show');
+            inputEmail.classList.add('error');
+          } else {
+            const errSenha = document.getElementById('err-senha');
+            const inputSenha = document.getElementById('senha');
+            errSenha.textContent = resultado.erro;
+            errSenha.classList.add('show');
+            inputSenha.classList.add('error');
+          }
+          return;
+        }
+
+        // Login bem-sucedido
+        const toast   = document.getElementById('toast');
+        const destino = FushubAuth.sanitizeRedirect(sessionStorage.getItem('fushub_redirect') || 'plataforma.html');
+        sessionStorage.removeItem('fushub_redirect');
+        toast.classList.add('show');
+        setTimeout(() => {
+          toast.classList.remove('show');
+          window.location.href = destino;
+        }, 1000);
+      }, 600);
+    });
+
+    document.querySelectorAll('.field input').forEach(input => {
+      input.addEventListener('input', () => {
+        input.classList.remove('error');
+        const errEl = document.getElementById('err-' + input.id);
+        if (errEl) errEl.classList.remove('show');
+      });
+    });
+
+    // ══════════════════════════════════════════
+    // RECUPERAÇÃO DE SENHA
+    // ══════════════════════════════════════════
+
+    let codigoGerado = '';
+    let emailRecuperacao = '';
+    let countdownTimer = null;
+
+    function mostrarRecuperacao() {
+      document.querySelector('.card').style.display = 'none';
+      document.getElementById('cardRecuperacao').style.display = 'block';
+      irStep(1);
+    }
+
+    function voltarLogin() {
+      document.getElementById('cardRecuperacao').style.display = 'none';
+      document.querySelector('.card').style.display = 'block';
+    }
+
+    function irStep(n) {
+      document.querySelectorAll('.recovery-step').forEach(s => s.classList.remove('active'));
+      document.getElementById('step' + n).classList.add('active');
+    }
+
+    // ── PASSO 1: Enviar código ──────────────────
+    function enviarCodigo() {
+      const input = document.getElementById('rec-email');
+      const err   = document.getElementById('err-rec-email');
+      const email = input.value.trim();
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        input.classList.add('error');
+        err.classList.add('show');
+        return;
+      }
+      input.classList.remove('error');
+      err.classList.remove('show');
+
+      // Verifica se o e-mail está cadastrado
+      const usuarios = JSON.parse(localStorage.getItem('fushub_usuarios') || '[]');
+      const existe = usuarios.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+      const btn = document.getElementById('btnEnviarCodigo');
+      btn.classList.add('loading'); btn.disabled = true;
+
+      setTimeout(() => {
+        btn.classList.remove('loading'); btn.disabled = false;
+
+        if (!existe) {
+          // Por segurança, não revela se o e-mail existe ou não
+          // Avança mesmo assim (não exponha quais e-mails estão cadastrados)
+        }
+
+        // Gera código de 6 dígitos
+        codigoGerado = String(Math.floor(100000 + Math.random() * 900000));
+        emailRecuperacao = email;
+
+        // Salva no localStorage com expiração de 10 minutos
+        const payload = { codigo: codigoGerado, email: email.toLowerCase(), expira: Date.now() + 10 * 60 * 1000 };
+        localStorage.setItem('fushub_rec_codigo', JSON.stringify(payload));
+
+        // Em produção: aqui chamaria uma API para enviar o e-mail.
+        // Em desenvolvimento: mostramos o código no console para teste.
+        console.log('%c[Fushub Dev] Código de recuperação: ' + codigoGerado, 'color:#1e56ff;font-weight:bold;font-size:14px');
+
+        // Atualiza UI do step 2
+        document.getElementById('emailDestino').textContent = email;
+        document.getElementById('step2Sub').textContent =
+          'Digite o código de 6 dígitos enviado para o seu e-mail';
+
+        // Limpa os inputs do código
+        document.querySelectorAll('#codeInputs input').forEach(i => {
+          i.value = ''; i.classList.remove('filled','error-digit');
+        });
+        document.getElementById('err-code').style.display = 'none';
+
+        irStep(2);
+        iniciarCountdown();
+        setTimeout(() => document.querySelector('#codeInputs input').focus(), 100);
+
+        showToastCustom('📧 Código enviado para ' + email, false);
+      }, 800);
+    }
+
+    // ── Countdown reenvio ───────────────────────
+    function iniciarCountdown() {
+      let s = 60;
+      const btn      = document.getElementById('resendBtn');
+      const countdown = document.getElementById('resendCountdown');
+      btn.disabled = true;
+      clearInterval(countdownTimer);
+      countdownTimer = setInterval(() => {
+        s--;
+        countdown.textContent = '(' + s + 's)';
+        if (s <= 0) {
+          clearInterval(countdownTimer);
+          btn.disabled = false;
+          countdown.textContent = '';
+        }
+      }, 1000);
+    }
+
+    function reenviarCodigo() {
+      document.getElementById('rec-email').value = emailRecuperacao;
+      enviarCodigo();
+    }
+
+    // ── Inputs do código: navegação automática ──
+    document.querySelectorAll('#codeInputs input').forEach((input, i, arr) => {
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Backspace' && !input.value && i > 0) arr[i - 1].focus();
+      });
+      input.addEventListener('input', e => {
+        const val = input.value.replace(/\D/g, '');
+        input.value = val;
+        input.classList.toggle('filled', val !== '');
+        input.classList.remove('error-digit');
+        document.getElementById('err-code').style.display = 'none';
+        if (val && i < arr.length - 1) arr[i + 1].focus();
+        // Auto-verifica quando todos preenchidos
+        const codigo = Array.from(arr).map(inp => inp.value).join('');
+        if (codigo.length === 6) verificarCodigo();
+      });
+      input.addEventListener('paste', e => {
+        e.preventDefault();
+        const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+        pasted.split('').forEach((ch, j) => {
+          if (arr[j]) { arr[j].value = ch; arr[j].classList.add('filled'); }
+        });
+        if (arr[pasted.length]) arr[pasted.length].focus();
+        if (pasted.length === 6) verificarCodigo();
+      });
+    });
+
+    // ── PASSO 2: Verificar código ───────────────
+    function verificarCodigo() {
+      const inputs = document.querySelectorAll('#codeInputs input');
+      const digitado = Array.from(inputs).map(i => i.value).join('');
+      if (digitado.length < 6) return;
+
+      const btn = document.getElementById('btnVerificarCodigo');
+      btn.classList.add('loading'); btn.disabled = true;
+
+      setTimeout(() => {
+        btn.classList.remove('loading'); btn.disabled = false;
+
+        // Verifica código e expiração
+        let valido = false;
+        try {
+          const payload = JSON.parse(localStorage.getItem('fushub_rec_codigo') || '{}');
+          if (payload.codigo === digitado &&
+              payload.email === emailRecuperacao.toLowerCase() &&
+              Date.now() < payload.expira) {
+            valido = true;
+          }
+        } catch(e) {}
+
+        if (!valido) {
+          inputs.forEach(i => i.classList.add('error-digit'));
+          const errCode = document.getElementById('err-code');
+          errCode.textContent = 'Código incorreto ou expirado. Tente novamente.';
+          errCode.style.display = 'block';
+          return;
+        }
+
+        clearInterval(countdownTimer);
+        irStep(3);
+        setTimeout(() => document.getElementById('nova-senha').focus(), 100);
+      }, 600);
+    }
+
+    // ── PASSO 3: Redefinir senha ────────────────
+    function atualizarForca(senha) {
+      const bar   = document.getElementById('forcaBar');
+      const label = document.getElementById('forcaLabel');
+      let forca = 0;
+      if (senha.length >= 6)  forca++;
+      if (senha.length >= 10) forca++;
+      if (/[A-Z]/.test(senha)) forca++;
+      if (/[0-9]/.test(senha)) forca++;
+      if (/[^A-Za-z0-9]/.test(senha)) forca++;
+
+      const niveis = [
+        { pct: '0%',   cor: 'transparent', txt: '' },
+        { pct: '25%',  cor: '#f87171', txt: '⚠ Fraca' },
+        { pct: '50%',  cor: '#fb923c', txt: 'Razoável' },
+        { pct: '75%',  cor: '#facc15', txt: 'Boa' },
+        { pct: '90%',  cor: '#4ade80', txt: 'Forte' },
+        { pct: '100%', cor: '#22c55e', txt: '✓ Muito forte' },
+      ];
+      const n = niveis[Math.min(forca, 5)];
+      bar.style.width = n.pct;
+      bar.style.background = n.cor;
+      label.textContent = n.txt;
+      label.style.color = n.cor === 'transparent' ? 'transparent' : n.cor;
+    }
+
+    function toggleNovaSenha(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon  = document.getElementById(iconId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+      } else {
+        input.type = 'password';
+        icon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+      }
+    }
+
+    function redefinirSenha() {
+      const nova  = document.getElementById('nova-senha').value;
+      const conf  = document.getElementById('conf-senha').value;
+      const errNova = document.getElementById('err-nova-senha');
+      const errConf = document.getElementById('err-conf-senha');
+      let valido = true;
+
+      if (nova.length < 6) {
+        document.getElementById('nova-senha').classList.add('error');
+        errNova.classList.add('show'); valido = false;
+      } else {
+        document.getElementById('nova-senha').classList.remove('error');
+        errNova.classList.remove('show');
+      }
+      if (nova !== conf) {
+        document.getElementById('conf-senha').classList.add('error');
+        errConf.classList.add('show'); valido = false;
+      } else {
+        document.getElementById('conf-senha').classList.remove('error');
+        errConf.classList.remove('show');
+      }
+      if (!valido) return;
+
+      const btn = document.getElementById('btnRedefinir');
+      btn.classList.add('loading'); btn.disabled = true;
+
+      setTimeout(() => {
+        // Atualiza a senha no localStorage
+        const usuarios = JSON.parse(localStorage.getItem('fushub_usuarios') || '[]');
+        const idx = usuarios.findIndex(u => u.email.toLowerCase() === emailRecuperacao.toLowerCase());
+        if (idx !== -1) {
+          usuarios[idx].senha = nova;
+          localStorage.setItem('fushub_usuarios', JSON.stringify(usuarios));
+        }
+        // Limpa o código usado
+        localStorage.removeItem('fushub_rec_codigo');
+
+        btn.classList.remove('loading'); btn.disabled = false;
+        showToastCustom('✓ Senha redefinida com sucesso!', false);
+
+        setTimeout(() => {
+          voltarLogin();
+          // Pré-preenche o e-mail
+          document.getElementById('email').value = emailRecuperacao;
+        }, 1200);
+      }, 700);
+    }
+
+    function showToastCustom(msg, erro) {
+      const t = document.getElementById('toast');
+      t.innerHTML = msg;
+      t.style.background = erro ? '#2a0e0e' : '#0e2a1a';
+      t.style.borderColor = erro ? 'rgba(248,113,113,0.3)' : 'rgba(52,211,153,0.3)';
+      t.style.color = erro ? '#f87171' : '#34d399';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+  </script>
+</body>
+</html>

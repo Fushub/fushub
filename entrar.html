@@ -516,10 +516,9 @@
       }
     }
 
-    document.getElementById('loginForm').addEventListener('submit', function (e) {
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
       e.preventDefault();
 
-      // Validação básica de formato
       const fields = [
         { id: 'email', errId: 'err-email', check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
         { id: 'senha', errId: 'err-senha', check: v => v.length >= 1 },
@@ -542,41 +541,34 @@
       btn.classList.add('loading');
       btn.disabled = true;
 
-      // Pequeno delay para UX (simula latência de rede)
-      setTimeout(() => {
-        const resultado = FushubAuth.entrar(email, senha);
+      const resultado = await FushubAuth.entrar(email, senha);
 
-        if (!resultado.ok) {
-          btn.classList.remove('loading');
-          btn.disabled = false;
+      if (!resultado.ok) {
+        btn.classList.remove('loading');
+        btn.disabled = false;
 
-          // Mostra o erro no campo correto
-          if (resultado.erro.includes('E-mail')) {
-            const errEmail = document.getElementById('err-email');
-            const inputEmail = document.getElementById('email');
-            errEmail.textContent = resultado.erro;
-            errEmail.classList.add('show');
-            inputEmail.classList.add('error');
-          } else {
-            const errSenha = document.getElementById('err-senha');
-            const inputSenha = document.getElementById('senha');
-            errSenha.textContent = resultado.erro;
-            errSenha.classList.add('show');
-            inputSenha.classList.add('error');
-          }
-          return;
+        if (resultado.erro.includes('E-mail') || resultado.erro.includes('e-mail')) {
+          const errEmail = document.getElementById('err-email');
+          errEmail.textContent = resultado.erro;
+          errEmail.classList.add('show');
+          document.getElementById('email').classList.add('error');
+        } else {
+          const errSenha = document.getElementById('err-senha');
+          errSenha.textContent = resultado.erro;
+          errSenha.classList.add('show');
+          document.getElementById('senha').classList.add('error');
         }
+        return;
+      }
 
-        // Login bem-sucedido
-        const toast   = document.getElementById('toast');
-        const destino = FushubAuth.sanitizeRedirect(sessionStorage.getItem('fushub_redirect') || 'plataforma.html');
-        sessionStorage.removeItem('fushub_redirect');
-        toast.classList.add('show');
-        setTimeout(() => {
-          toast.classList.remove('show');
-          window.location.href = destino;
-        }, 1000);
-      }, 600);
+      const toast   = document.getElementById('toast');
+      const destino = sessionStorage.getItem('fushub_redirect') || 'plataforma.html';
+      sessionStorage.removeItem('fushub_redirect');
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+        window.location.href = destino;
+      }, 1000);
     });
 
     document.querySelectorAll('.field input').forEach(input => {

@@ -348,16 +348,13 @@
       }
     });
 
-    // Aviso de e-mail já cadastrado em tempo real
+    // Aviso de e-mail inválido em tempo real (duplicata é verificada no submit pelo Supabase)
     document.getElementById('email').addEventListener('blur', function () {
       const v     = this.value.trim();
       const errEl = document.getElementById('err-email');
       if (!v || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return;
-      if (FushubAuth.emailExiste(v)) {
-        errEl.textContent = 'Este e-mail já tem conta. Que tal entrar?';
-        errEl.classList.add('show');
-        this.classList.add('error');
-      }
+      errEl.classList.remove('show');
+      this.classList.remove('error');
     });
 
     function toggleSenha(inputId, iconId) {
@@ -377,7 +374,7 @@
       }
     }
 
-    document.getElementById('signupForm').addEventListener('submit', function (e) {
+    document.getElementById('signupForm').addEventListener('submit', async function (e) {
       e.preventDefault();
 
       const fields = [
@@ -410,37 +407,36 @@
       btn.classList.add('loading');
       btn.disabled = true;
 
+      const resultado = await FushubAuth.registrar({
+        nome:      document.getElementById('nome').value.trim(),
+        sobrenome: document.getElementById('sobrenome').value.trim(),
+        telefone:  document.getElementById('telefone').value.trim(),
+        email:     document.getElementById('email').value.trim(),
+        senha:     document.getElementById('senha').value,
+        faculdade: document.getElementById('faculdade').value.trim(),
+      });
+
+      if (!resultado.ok) {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        const errEmail = document.getElementById('err-email');
+        errEmail.textContent = resultado.erro;
+        errEmail.style.color = '#f87171';
+        errEmail.classList.add('show');
+        document.getElementById('email').classList.add('error');
+        return;
+      }
+
+      // Conta criada — avisa sobre confirmação de e-mail e redireciona
+      const toast = document.getElementById('toast');
+      toast.querySelector
+        ? toast.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg> Conta criada! Verifique seu e-mail.'
+        : null;
+      toast.classList.add('show');
       setTimeout(() => {
-        const resultado = FushubAuth.registrar({
-          nome:      document.getElementById('nome').value.trim(),
-          sobrenome: document.getElementById('sobrenome').value.trim(),
-          telefone:  document.getElementById('telefone').value.trim(),
-          email:     document.getElementById('email').value.trim(),
-          senha:     document.getElementById('senha').value,
-          faculdade: document.getElementById('faculdade').value.trim(),
-        });
-
-        if (!resultado.ok) {
-          btn.classList.remove('loading');
-          btn.disabled = false;
-          // E-mail duplicado — mostra no campo de email
-          const errEmail = document.getElementById('err-email');
-          errEmail.textContent = resultado.erro;
-          errEmail.style.color = '#f87171';
-          errEmail.classList.add('show');
-          document.getElementById('email').classList.add('error');
-          return;
-        }
-
-        // Conta criada e sessão iniciada com sucesso
-        const toast = document.getElementById('toast');
-        toast.classList.add('show');
-        setTimeout(() => {
-          toast.classList.remove('show');
-          window.location.href = 'plataforma.html';
-        }, 1800);
-
-      }, 800);
+        toast.classList.remove('show');
+        window.location.href = 'entrar.html';
+      }, 2500);
     });
 
     document.querySelectorAll('.field input').forEach(input => {

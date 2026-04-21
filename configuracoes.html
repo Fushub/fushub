@@ -782,8 +782,8 @@
     return 'fushub_notif_prefs_' + (email || '').toLowerCase();
   }
 
-  function carregarPrefsNotif() {
-    const user = FushubAuth.getUser();
+  async function carregarPrefsNotif() {
+    const user = await FushubAuth.getUser();
     if (!user) return;
     try {
       const prefs = JSON.parse(localStorage.getItem(chaveNotifPrefs(user.email)) || '{}');
@@ -798,8 +798,8 @@
     } catch(e) {}
   }
 
-  function salvarNotificacoes() {
-    const user = FushubAuth.getUser();
+  async function salvarNotificacoes() {
+    const user = await FushubAuth.getUser();
     if (!user) { showToast('Você precisa estar logado'); return; }
     const prefs = {
       mensagens:  document.getElementById('togMensagens')?.checked  ?? true,
@@ -820,8 +820,8 @@
       try { return JSON.parse(localStorage.getItem(chaveNotifPrefs(email)) || '{}'); }
       catch(e) { return {}; }
     },
-    mensagem(conv) {
-      const user = FushubAuth.getUser(); if (!user) return;
+    async mensagem(conv) {
+      const user = await FushubAuth.getUser(); if (!user) return;
       const prefs = this._getPrefs(user.email);
       if (prefs.mensagens === false) return;
       enviarEmailNotificacao({
@@ -832,20 +832,9 @@
       });
     },
     novoImovel(imovel) {
-      // Notifica todos os usuários que têm togNovoImovel ativado
-      try {
-        const usuarios = JSON.parse(localStorage.getItem('fushub_usuarios') || '[]');
-        usuarios.forEach(u => {
-          const prefs = this._getPrefs(u.email);
-          if (!prefs.novoImovel) return;
-          enviarEmailNotificacao({
-            to_email: u.email,
-            to_name:  [u.nome, u.sobrenome].filter(Boolean).join(' ') || 'Usuário',
-            subject:  'Novo imóvel disponível no Fushub',
-            message:  `Um novo imóvel foi cadastrado: "${imovel.titulo}" em ${imovel.loc} por R$ ${imovel.preco}/mês. Acesse o Fushub para ver mais detalhes.`,
-          });
-        });
-      } catch(e) {}
+      // Com Supabase, notificações em massa são tratadas via backend/edge functions.
+      // Por ora, apenas loga o evento.
+      console.log('[Fushub] Novo imóvel publicado:', imovel.titulo);
     },
     avaliacao(emailDono, avNome) {
       const user = FushubAuth.getUser(); if (!user) return;
@@ -861,18 +850,16 @@
   };
 
   // ── INIT ──────────────────────────────────────────────────────────────
-  (function() {
-    const user  = FushubAuth.getUser() || {};
+  (async function() {
+    const user  = await FushubAuth.getUser() || {};
     const nome  = user.nome      || '';
     const sobre = user.sobrenome || '';
-    const email = user.email     || '';
 
     const ini1 = (nome[0]  || 'U').toUpperCase();
     const ini2 = (sobre[0] || '').toUpperCase();
-    const initials = ini1 + ini2;
 
     const navAv = document.getElementById('navAvatar');
-    if (navAv) navAv.textContent = initials;
+    if (navAv) navAv.textContent = ini1 + ini2;
 
     // Carrega prefs salvas nos toggles
     carregarPrefsNotif();
@@ -963,7 +950,7 @@
     lbl.style.color = forca > 0 ? cores[forca - 1] : 'var(--muted)';
   }
 
-  function salvarNovaSenha() {
+  async function salvarNovaSenha() {
     // Limpa erros anteriores
     ['err-senhaAtual', 'err-confirmaSenha', 'err-senha-geral'].forEach(id => {
       const el = document.getElementById(id);
@@ -975,7 +962,7 @@
     const novaSenha     = document.getElementById('novaSenha').value;
     const confirmaSenha = document.getElementById('confirmaSenha').value;
 
-    // Validações locais antes de chamar o auth
+    // Validações locais
     let valido = true;
     if (!senhaAtual) {
       const el = document.getElementById('err-senhaAtual');
@@ -991,8 +978,13 @@
     }
     if (!valido) return;
 
-    // Chama o auth.js que verifica a senha atual e atualiza no localStorage
-    const res = FushubAuth.alterarSenha(senhaAtual, novaSenha, confirmaSenha);
+    const btn = document.getElementById('btnSalvarSenha');
+    btn.disabled = true;
+
+    // Supabase não usa a senha atual para update — só valida no backend
+    const res = await FushubAuth.alterarSenha(senhaAtual, novaSenha, confirmaSenha);
+
+    btn.disabled = false;
 
     if (!res.ok) {
       const el = document.getElementById('err-senha-geral');

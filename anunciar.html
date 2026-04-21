@@ -599,7 +599,7 @@
     });
 
     // ── Publicar ──
-    function publicar() {
+    async function publicar() {
       const titulo  = document.getElementById('fTitulo').value.trim();
       const cidade  = document.getElementById('fCidade').value.trim();
       const bairro  = document.getElementById('fBairro').value.trim();
@@ -650,57 +650,67 @@
       const btn = document.getElementById('btnPublish');
       btn.classList.add('loading'); btn.disabled = true;
 
-      // Monta o objeto do imóvel
       const comodidades = [...document.querySelectorAll('#comodChips .sel-chip.active')].map(c => c.dataset.val);
-      const imgSrc = document.getElementById('imgPreview').src || null;
 
-      // Limita imagens base64: aceita só se < 200KB para não encher o localStorage
-      let imgCustom = null;
-      if (imgSrc && imgSrc.startsWith('data:')) {
-        imgCustom = imgSrc;
+      // Upload da foto de capa para o Supabase Storage
+      let fotoCapa = null;
+      const capainputFile = document.getElementById('imgInput').files[0];
+      if (capainputFile) {
+        fotoCapa = await uploadFoto(capainputFile, 'capa');
+      }
+
+      // Upload das fotos extras
+      const fotosExtrasUrls = [];
+      for (let i = 0; i < 4; i++) {
+        const inputEl = document.getElementById('extraInput-' + i);
+        if (inputEl && inputEl.files[0]) {
+          const url = await uploadFoto(inputEl.files[0], 'extra-' + i);
+          if (url) fotosExtrasUrls.push(url);
+        }
       }
 
       const imovel = {
-        id: Date.now(),
         titulo,
         loc: bairro ? `${bairro}, ${cidade}` : cidade,
         cidade,
         bairro,
-        rua:       document.getElementById('fRua').value.trim(),
-        estado:    document.getElementById('fEstado').value,
-        tipo: tipoEl.dataset.val,
-        preco: Math.round(preco),
-        quartos:   parseInt(document.getElementById('fQuartos').value) || 1,
-        banheiros: parseInt(document.getElementById('fBanheiros').value) || 1,
-        vagas:     parseInt(document.getElementById('fVagas').value) || 1,
-        moradores: parseInt(document.getElementById('fMoradores').value) || 0,
-        status:    document.getElementById('fStatus').value,
+        endereco:  document.getElementById('fRua').value.trim(),
+        tipo:      tipoEl.dataset.val,
+        preco:     Math.round(preco),
+        capacidade: parseInt(document.getElementById('fVagas').value) || 1,
+        mobiliado:  comodidades.includes('Mobiliado'),
+        aceita_pets: comodidades.includes('Pet friendly'),
         comodidades,
         descricao: desc,
-        stars: 0,
-        reviews: 0,
-        avaliacoes: [],
-        emoji: getEmoji(tipoEl.dataset.val),
-        img: imgClassPorTipo(tipoEl.dataset.val),
-        badge: 'Novo',
-        imgCustom,
-        fotosExtras: extraPhotosData.filter(Boolean),
-        criadoEm: new Date().toISOString(),
+        foto_capa: fotoCapa,
+        fotos_extras: fotosExtrasUrls,
       };
 
-      // Salva via FushubAuth (isolado por usuário)
-      FushubAuth.salvarImovel(imovel);
-      // Dispara notificação de novo imóvel para usuários interessados
-      if (window.FushubNotif) FushubNotif.novoImovel(imovel);
+      const resultado = await FushubAuth.salvarImovel(imovel);
 
+      btn.classList.remove('loading'); btn.disabled = false;
+
+      if (!resultado.ok) {
+        alert('Erro ao publicar: ' + resultado.erro);
+        return;
+      }
+
+      document.getElementById('toast').classList.add('show');
       setTimeout(() => {
-        btn.classList.remove('loading'); btn.disabled = false;
-        document.getElementById('toast').classList.add('show');
-        setTimeout(() => {
-          document.getElementById('toast').classList.remove('show');
-          window.location.href = 'painel.html';
-        }, 2000);
-      }, 1200);
+        document.getElementById('toast').classList.remove('show');
+        window.location.href = 'painel.html';
+      }, 2000);
+    }
+
+    async function uploadFoto(arquivo, sufixo) {
+      const sb = FushubAuth.getSupabase();
+      const { data: { user } } = await sb.auth.getUser();
+      const ext = arquivo.name.split('.').pop();
+      const nome = `${user.id}-${Date.now()}-${sufixo}.${ext}`;
+      const { error } = await sb.storage.from('imoveis-fotos').upload(nome, arquivo, { upsert: true });
+      if (error) { console.error('Upload error:', error); return null; }
+      const { data } = sb.storage.from('imoveis-fotos').getPublicUrl(nome);
+      return data.publicUrl;
     }
 
     function getEmoji(tipo) {

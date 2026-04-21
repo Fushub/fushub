@@ -514,35 +514,13 @@
   </div>
 
   <script>
-    function carregarTodosImoveis() {
-      return FushubAuth.getTodosImoveis();
-    }
-
-    let IMOVEIS = carregarTodosImoveis();
-    // ── Avaliações reais sincronizadas com imovel.html ─────────────────
-    // Usa a mesma chave fushub_av_{id} que imovel.html usa ao salvar avaliações
-    function carregarAvaliacoes(id) {
-      try { return JSON.parse(localStorage.getItem('fushub_av_' + String(id)) || '[]'); } catch(e) { return []; }
-    }
+    let IMOVEIS = [];
+    let favs = new Set();
 
     function calcStarsReais(im) {
-      const avsSalvas = carregarAvaliacoes(im.id);
-      const todasAvs  = [...(im.avaliacoes || []), ...avsSalvas];
-      if (todasAvs.length === 0) {
-        // Sem avaliações reais — usa dados do imóvel (fake ou real)
-        return { media: im.stars || 0, total: im.reviews || 0 };
-      }
-      const media = (todasAvs.reduce((s, a) => s + (a.stars || 5), 0) / todasAvs.length).toFixed(1);
-      return { media: parseFloat(media), total: todasAvs.length };
-    }
-
-
-    // Favs persistidos no localStorage, IDs sempre como string
-    const _favsRaw = JSON.parse(localStorage.getItem('fushub_favs') || '[]');
-    let favs = new Set(_favsRaw.map(String));
-
-    function saveFavs() {
-      localStorage.setItem('fushub_favs', JSON.stringify([...favs]));
+      if (!im.avaliacoes || im.avaliacoes.length === 0) return { media: im.stars || 0, total: im.reviews || 0 };
+      const media = (im.avaliacoes.reduce((s, a) => s + (a.stars || 5), 0) / im.avaliacoes.length).toFixed(1);
+      return { media: parseFloat(media), total: im.avaliacoes.length };
     }
 
     function renderImoveis(lista) {
@@ -627,7 +605,6 @@
     }
 
     function aplicarFiltro() {
-      IMOVEIS = carregarTodosImoveis();
 
       // ── Busca textual (normalizada) ────────────────────────────────────
       const where = norm(document.getElementById('searchWhere').value.trim());
@@ -701,11 +678,22 @@
 
     function buscar() { aplicarFiltro(); }
 
-    function toggleFav(e, id) {
+    async function inicializar() {
+      IMOVEIS = await FushubAuth.getTodosImoveis();
+      const ids = await FushubAuth.getFavoritos();
+      favs = new Set(ids.map(String));
+      aplicarFiltro();
+    }
+
+    async function toggleFav(e, id) {
       e.stopPropagation();
       const sid = String(id);
-      if (favs.has(sid)) favs.delete(sid); else favs.add(sid);
-      saveFavs();
+      const resultado = await FushubAuth.toggleFavorito(id);
+      if (resultado.favoritado) {
+        favs.add(sid);
+      } else {
+        favs.delete(sid);
+      }
       aplicarFiltro();
     }
 
@@ -762,9 +750,9 @@
 
 
     // Esconde "Tornar-se anfitrião" se o usuário já for anfitrião
-    (function() {
+    (async function() {
       var lnk = document.getElementById('linkAnfitriao');
-      if (lnk && typeof FushubAuth !== 'undefined' && FushubAuth.isAnfitriao()) {
+      if (lnk && typeof FushubAuth !== 'undefined' && await FushubAuth.isAnfitriao()) {
         lnk.style.display = 'none';
         var prev = lnk.previousElementSibling;
         if (prev && prev.classList.contains('dropdown-divider')) prev.style.display = 'none';
@@ -773,7 +761,7 @@
 
     function logout() { FushubAuth.logout(); }
 
-    aplicarFiltro();
+    inicializar();
 
     // Aba do anfitrião injetada automaticamente pelo auth.js
   </script>

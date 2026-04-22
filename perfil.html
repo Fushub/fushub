@@ -462,38 +462,32 @@
   </div>
 
   <script>
-    // ── Carrega dados do cadastro + perfil salvo ──
-    function loadData() {
-      const merged = FushubAuth.getUser() || {};
+    // ── Carrega dados do Supabase e preenche o form ──
+    async function loadData() {
+      const user = await FushubAuth.getUser();
+      if (!user) return;
 
-      // Campos do form
-      document.getElementById('fNome').value      = merged.nome      || '';
-      document.getElementById('fSobrenome').value = merged.sobrenome || '';
-      document.getElementById('fEmail').value     = merged.email     || '';
-      document.getElementById('fTelefone').value  = merged.telefone  || '';
-      document.getElementById('fBio').value       = merged.bio       || '';
-      document.getElementById('fCidade').value    = merged.cidade    || '';
-      document.getElementById('fFaculdade').value = merged.faculdade || '';
-      document.getElementById('fCurso').value     = merged.curso     || '';
-      document.getElementById('fPeriodo').value   = merged.periodo   || '';
+      document.getElementById('fNome').value      = user.nome      || '';
+      document.getElementById('fSobrenome').value = user.sobrenome || '';
+      document.getElementById('fEmail').value     = user.email     || '';
+      document.getElementById('fTelefone').value  = user.telefone  || '';
+      document.getElementById('fBio').value       = user.bio       || '';
+      document.getElementById('fCidade').value    = user.cidade    || '';
+      document.getElementById('fFaculdade').value = user.faculdade || '';
+      document.getElementById('fCurso').value     = user.curso     || '';
+      document.getElementById('fPeriodo').value   = user.periodo   || '';
 
       // Interesses
-      if (merged.interesses && merged.interesses.length) {
+      if (user.interesses && user.interesses.length) {
         document.querySelectorAll('.interest-chip').forEach(chip => {
-          if (merged.interesses.includes(chip.textContent.trim())) chip.classList.add('active');
+          if (user.interesses.includes(chip.textContent.trim())) chip.classList.add('active');
         });
       }
 
-      // Toggles
-      // perfil sempre público — opções de visibilidade removidas
-
       // Avatar
-      if (merged.avatarUrl) {
-        const img = document.createElement('img');
-        img.src = merged.avatarUrl;
+      if (user.avatar_url) {
         const circle = document.getElementById('avatarCircle');
-        circle.innerHTML = '';
-        circle.appendChild(img);
+        circle.innerHTML = `<img src="${user.avatar_url}" style="width:100%;height:100%;object-fit:cover;" />`;
       }
 
       atualizarPreview();
@@ -522,7 +516,6 @@
       document.getElementById('statCidade').textContent = cidade ? cidade.split(',')[0] : '—';
       document.getElementById('statFaculdade').textContent = faculdade || '—';
 
-      // Tags de interesses
       const ativos = [...document.querySelectorAll('.interest-chip.active')].map(c => c.textContent.trim());
       const tagsEl = document.getElementById('prevTags');
       if (ativos.length) {
@@ -539,82 +532,74 @@
       atualizarPreview();
     }
 
-    // ── Upload de avatar ──
-    // ── Perfil público (acessível por outros usuários via email) ──────────
-    function chavePerfilPublico(email) {
-      return 'fushub_perfil_publico_' + (email || '').toLowerCase().trim();
-    }
-
-    function salvarPerfilPublico(perfil) {
-      if (!perfil.email) return;
-      var pub = {
-        nome:        perfil.nome       || '',
-        sobrenome:   perfil.sobrenome  || '',
-        bio:         perfil.bio        || '',
-        cidade:      perfil.cidade     || '',
-        faculdade:   perfil.faculdade  || '',
-        curso:       perfil.curso      || '',
-        periodo:     perfil.periodo    || '',
-        interesses:  perfil.interesses || [],
-        avatarUrl:   perfil.avatarUrl  || null,
-        atualizadoEm: new Date().toISOString(),
-      };
-      localStorage.setItem(chavePerfilPublico(perfil.email), JSON.stringify(pub));
-    }
-
-    function handleAvatar(input) {
+    // ── Upload de avatar para o Supabase Storage ──
+    async function handleAvatar(input) {
       if (!input.files || !input.files[0]) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const circle = document.getElementById('avatarCircle');
-        const initialsEl = document.getElementById('avatarInitials');
-        if (initialsEl) initialsEl.remove();
-        let img = circle.querySelector('img');
-        if (!img) {
-          img = document.createElement('img');
-          circle.appendChild(img);
-        }
-        img.src = e.target.result;
-        // salva temporariamente
-        const perfil = JSON.parse(localStorage.getItem(FushubAuth.KEYS.perfil) || '{}');
-        perfil.avatarUrl = e.target.result;
-        localStorage.setItem(FushubAuth.KEYS.perfil, JSON.stringify(perfil));
-        salvarPerfilPublico(perfil);
-      };
-      reader.readAsDataURL(input.files[0]);
+      const arquivo = input.files[0];
+      const sb = FushubAuth.getSupabase();
+      const { data: { user } } = await sb.auth.getUser();
+
+      const ext  = arquivo.name.split('.').pop();
+      const nome = `avatar-${user.id}.${ext}`;
+
+      const { error } = await sb.storage.from('avatares').upload(nome, arquivo, { upsert: true });
+      if (error) { console.error('Erro upload avatar:', error); return; }
+
+      const { data } = sb.storage.from('avatares').getPublicUrl(nome);
+      const url = data.publicUrl;
+
+      // Atualiza no banco
+      await sb.from('perfis').update({ avatar_url: url }).eq('id', user.id);
+
+      // Atualiza visualmente
+      const circle = document.getElementById('avatarCircle');
+      circle.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;" />`;
     }
 
-    // ── Salvar ──
-    function salvarPerfil() {
+    // ── Salvar perfil no Supabase ──
+    async function salvarPerfil() {
       const btn = document.getElementById('btnSave');
       btn.classList.add('loading'); btn.disabled = true;
 
       const interesses = [...document.querySelectorAll('.interest-chip.active')].map(c => c.textContent.trim());
-      const perfil = {
-        nome:       document.getElementById('fNome').value.trim(),
-        sobrenome:  document.getElementById('fSobrenome').value.trim(),
-        telefone:   document.getElementById('fTelefone').value.trim(),
-        bio:        document.getElementById('fBio').value.trim(),
-        cidade:     document.getElementById('fCidade').value.trim(),
-        faculdade:  document.getElementById('fFaculdade').value.trim(),
-        curso:      document.getElementById('fCurso').value.trim(),
-        periodo:    document.getElementById('fPeriodo').value,
+
+      const dados = {
+        nome:      document.getElementById('fNome').value.trim(),
+        sobrenome: document.getElementById('fSobrenome').value.trim(),
+        tel:       document.getElementById('fTelefone').value.trim(),
+        bio:       document.getElementById('fBio').value.trim(),
+        cidade:    document.getElementById('fCidade').value.trim(),
+        univ:      document.getElementById('fFaculdade').value.trim(),
+        curso:     document.getElementById('fCurso').value.trim(),
+        periodo:   document.getElementById('fPeriodo').value,
         interesses,
-        togPublico:  true,
-        togTelefone: true,
       };
 
-      // preserva avatar e email
-      const user = FushubAuth.getUser() || {};
-      perfil.avatarUrl = user.avatarUrl || null;
-      perfil.email     = user.email || '';
+      // Salva no Supabase via FushubAuth
+      const sb = FushubAuth.getSupabase();
+      const { data: { user } } = await sb.auth.getUser();
 
-      setTimeout(() => {
-        localStorage.setItem(FushubAuth.KEYS.perfil, JSON.stringify(perfil));
-        salvarPerfilPublico(perfil);
-        btn.classList.remove('loading'); btn.disabled = false;
-        showToast();
-      }, 900);
+      const { error } = await sb.from('perfis').update({
+        nome:        dados.nome,
+        sobrenome:   dados.sobrenome,
+        telefone:    dados.tel,
+        bio:         dados.bio,
+        cidade:      dados.cidade,
+        faculdade:   dados.univ,
+        curso:       dados.curso,
+        periodo:     dados.periodo,
+        interesses:  dados.interesses,
+        atualizado_em: new Date().toISOString(),
+      }).eq('id', user.id);
+
+      btn.classList.remove('loading'); btn.disabled = false;
+
+      if (error) {
+        alert('Erro ao salvar: ' + error.message);
+        return;
+      }
+
+      showToast();
     }
 
     // ── Cancelar ──

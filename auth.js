@@ -6,17 +6,9 @@
 const SUPABASE_URL  = 'https://gyutskbeadrwlrmewjiw.supabase.co';
 const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5dXRza2JlYWRyd2xybWV3aml3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTM5OTcsImV4cCI6MjA5MjI4OTk5N30.cPl1p-PhL4Jpc31hWTNN2aHTR9qcgYOPUOahfkqDmEc';
 
-/* Carrega o SDK do Supabase via CDN */
-(function loadSupabase() {
-  if (window.supabase) return;
-  const s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-  s.onload = () => {
-    window._supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    window.dispatchEvent(new Event('supabase:ready'));
-  };
-  document.head.appendChild(s);
-})();
+/* O SDK já foi carregado pelo <script> antes deste arquivo.
+   Cria o client diretamente — sem carregamento dinâmico. */
+window._supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function getSupabase() {
   return window._supabaseClient;
@@ -169,8 +161,10 @@ async function salvarImovel(imovel) {
     area:        imovel.area || null,
     capacidade:  imovel.capacidade || null,
     mobiliado:   imovel.mobiliado || false,
-    aceita_pets: imovel.aceitaPets || false,
+    aceita_pets: imovel.aceita_pets || false,
     comodidades: imovel.comodidades || [],
+    foto_capa:   imovel.foto_capa || null,
+    fotos_extras: imovel.fotos_extras || [],
     ativo:       true,
   };
 
@@ -262,7 +256,7 @@ function ouvirMensagens(callback) {
   const canal = sb.channel('mensagens-realtime')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensagens' }, callback)
     .subscribe();
-  return canal; /* guarde para poder cancelar: canal.unsubscribe() */
+  return canal;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -275,13 +269,15 @@ async function atualizarPerfil(dados) {
   if (!user) return { ok: false, erro: 'Você precisa estar logado.' };
 
   const { error } = await sb.from('perfis').update({
-    nome:      dados.nome?.trim(),
-    sobrenome: dados.sobrenome?.trim(),
-    telefone:  dados.tel?.trim(),
-    faculdade: dados.univ?.trim(),
-    curso:     dados.curso?.trim(),
-    bio:       dados.bio?.trim(),
-    cidade:    dados.cidade?.trim(),
+    nome:         dados.nome?.trim(),
+    sobrenome:    dados.sobrenome?.trim(),
+    telefone:     dados.tel?.trim(),
+    faculdade:    dados.univ?.trim(),
+    curso:        dados.curso?.trim(),
+    bio:          dados.bio?.trim(),
+    cidade:       dados.cidade?.trim(),
+    periodo:      dados.periodo,
+    interesses:   dados.interesses || [],
     atualizado_em: new Date().toISOString(),
   }).eq('id', user.id);
 
@@ -312,31 +308,26 @@ async function getInitials() {
   const script   = document.currentScript;
   const isPublic = script && script.hasAttribute('data-public');
 
-  /* Aguarda o Supabase estar pronto */
-  async function esperarSupabase() {
-    if (window._supabaseClient) return;
-    return new Promise(resolve => window.addEventListener('supabase:ready', resolve, { once: true }));
-  }
-
-  await esperarSupabase();
-
   const sb = getSupabase();
   const { data: { session } } = await sb.auth.getSession();
   const logado = !!session;
 
   if (isPublic && logado) {
     window.location.replace('plataforma.html');
+    return;
   } else if (!isPublic && !logado) {
     const tentativa = window.location.pathname.split('/').pop() + window.location.search;
     sessionStorage.setItem('fushub_redirect', tentativa);
     window.location.replace('entrar.html');
+    return;
   }
 
-  /* Preenche avatares após verificação */
+  /* Preenche avatares e injeta aba anfitrião após DOM pronto */
   if (logado) {
     document.addEventListener('DOMContentLoaded', async () => {
       const user = await getUser();
       const initials = getInitials_sync(user);
+
       document.querySelectorAll('.nav-avatar, #navAvatar, #bigAvatar').forEach(el => {
         if (el.dataset.skip) return;
         if (user?.avatar_url) {
@@ -347,7 +338,6 @@ async function getInitials() {
         }
       });
 
-      /* Injeta tab anfitrião se for anfitrião */
       if (user?.anfitriao) {
         const navTabs = document.querySelector('.nav-tabs, .nav-tabs-wrap');
         if (navTabs && !document.getElementById('tabAnfitriao')) {
@@ -411,6 +401,6 @@ window.FushubAuth = {
   getTema,
   salvarTema,
   aplicarTema,
-  /* supabase direto (para casos específicos) */
+  /* supabase direto */
   getSupabase,
 };

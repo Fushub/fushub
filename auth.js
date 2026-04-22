@@ -4,7 +4,7 @@
 
 /* ── Configuração do Supabase ─────────────────────────────── */
 const SUPABASE_URL  = 'https://gyutskbeadrwlrmewjiw.supabase.co';
-const SUPABASE_KEY  = 'sb_publishable_yWu5-U0pM4DePQWMpMATDw_Dz2p1R_w';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5dXRza2JlYWRyd2xybWV3aml3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTM5OTcsImV4cCI6MjA5MjI4OTk5N30.cPl1p-PhL4Jpc31hWTNN2aHTR9qcgYOPUOahfkqDmEc';
 
 /* Carrega o SDK do Supabase via CDN */
 (function loadSupabase() {
